@@ -14,8 +14,12 @@ env/
 
 # ---------- 数据集 / 大文件 ----------
 # GitHub 单个文件上限 100MB，数据集一律不入库
-data/
-datasets/
+# 用 data/* 而非 data/，这样目录本身能进 Git（靠 .gitkeep），
+# 换电脑克隆后文件夹还在，但里面的数据文件不会被上传
+data/*
+datasets/*
+!data/.gitkeep
+!datasets/.gitkeep
 *.csv
 *.tsv
 *.parquet

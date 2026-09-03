@@ -4,23 +4,34 @@
 
 ## 目录结构
 
-每次作业一个独立目录，命名规则 `assignment-<序号>-<主题>`：
+按文件类型组织，四个目录各司其职：
 
 ```
 bigdata-ai-coursework/
 ├── README.md
 ├── .gitignore
-├── assignment-01-wordcount/
-│   ├── src/           # 源代码
-│   ├── data/          # 数据集（不提交到 Git）
-│   └── report.md      # 实验报告
-└── assignment-02-ml/
+├── assignments/      # 作业代码（.py / .scala 等）
+├── data/             # 数据集（不上传，见下方说明）
+├── notebooks/        # Jupyter 笔记本，用于探索与可视化
+└── reports/          # 实验报告（Markdown 或 PDF）
 ```
+
+**命名建议**：同一份作业的多个文件用统一前缀，方便对应。
+
+```
+assignments/hw1_wordcount.py
+notebooks/hw1_exploration.ipynb
+reports/hw1_report.md
+```
+
+**关于 `data/`**：GitHub 单个文件上限 100MB，数据集一律不入库。
+目录本身通过 `.gitkeep` 保留在 Git 中，换电脑克隆后文件夹还在，
+但里面的数据文件不会上传 —— 数据集请自行保存备份。
 
 ## 环境
 
 - Python 3.12
-- 依赖统一放在各作业目录下的 `requirements.txt`
+- 依赖统一放在仓库根目录的 `requirements.txt`
 
 ## Git 常用命令速查
 
@@ -33,7 +44,7 @@ git pull                   # 拉取远程最新内容
 git log --oneline          # 查看提交历史
 ```
 
-**良好的提交说明**：`assignment-01: 完成词频统计` —— 说明改了什么、为什么改，不要写 `update`、`修改` 这类无信息量的内容。
+**良好的提交说明**：`hw1: 完成词频统计` —— 说明改了什么、为什么改，不要写 `update`、`修改` 这类无信息量的内容。
 
 ## 作业索引
 
