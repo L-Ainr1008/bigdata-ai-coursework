@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念关系说明：Agent、大模型的上下文、Skill</title>
+<style>
+  :root { --ink:#1f2328; --muted:#5a6470; --line:#d8dee4; --bg:#ffffff; --soft:#f6f8fa; }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 900px; margin: 0 auto; padding: 40px 24px 80px;
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    color: var(--ink); line-height: 1.75; background: var(--bg);
+  }
+  h1 { font-size: 1.8em; border-bottom: 3px solid var(--ink); padding-bottom: 12px; }
+  h2 { font-size: 1.35em; margin-top: 44px; padding-left: 12px; border-left: 5px solid #4a90d9; }
+  h3 { font-size: 1.1em; margin-top: 28px; color: #2c3e50; }
+  p, li { font-size: 0.98em; }
+  table { border-collapse: collapse; width: 100%; margin: 18px 0; font-size: 0.94em; }
+  th, td { border: 1px solid var(--line); padding: 9px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--soft); font-weight: 600; }
+  pre {
+    background: var(--soft); border: 1px solid var(--line); border-radius: 6px;
+    padding: 16px; overflow-x: auto; font-size: 0.86em; line-height: 1.5;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+  code { background: var(--soft); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  blockquote {
+    margin: 20px 0; padding: 14px 20px; background: #eef6ff;
+    border-left: 5px solid #4a90d9; border-radius: 0 6px 6px 0;
+  }
+  .note { background: #fff8e6; border-left: 5px solid #e0a800; padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0; }
+  .mine { background: #f0f7ee; border-left: 5px solid #4a8; padding: 14px 20px; margin: 18px 0; border-radius: 0 6px 6px 0; }
+  sup { color: #4a90d9; font-weight: 600; }
+  a { color: #0969da; word-break: break-all; }
+  .tag { display:inline-block; background:#e8f4ff; color:#1a5fa8; padding:2px 8px; border-radius:10px; font-size:.82em; margin-right:6px; }
+</style>
+</head>
+<body>
+
+<h1>三个概念之间的关系：Agent、大模型的上下文、Skill</h1>
+
+<p class="note"><strong>说明：</strong>本文与同目录下的 <code>concept-relationship.md</code> 内容一致。
+作业目录结构中列出的是 <code>.html</code>，而"内容要求三"中写作 <code>.md</code>，故两者都提供。</p>
+
+<h2>一、先给结论</h2>
+
+<p>这三个概念不在同一层，把它们并列容易糊涂。我的理解是三种不同的"角色"：</p>
+
+<table>
+  <tr><th style="width:22%">概念</th><th style="width:16%">角色</th><th>一句话</th></tr>
+  <tr><td><strong>上下文（Context）</strong></td><td>载体</td><td>模型此刻能"看见"的全部信息，一切判断都只基于它</td></tr>
+  <tr><td><strong>Agent（智能体）</strong></td><td>执行者</td><td>在上下文之上做规划、调工具、多轮推进直到完成目标的程序</td></tr>
+  <tr><td><strong>Skill（技能）</strong></td><td>知识资产</td><td>把"这类任务该怎么做"固化下来，按需加载进上下文的指令包</td></tr>
+</table>
+
+<p>所以它们的关系不是"A、B、C 三种技术"，而是：</p>
+
+<blockquote>
+<strong>Skill 写进上下文，上下文喂给 Agent，Agent 干活产生新信息，新信息又回到上下文——
+而做得好的做法，最终会被沉淀成新的 Skill。</strong><br><br>
+这是一个闭环，不是一条直线。
+</blockquote>
+
+<h2>二、关系图</h2>
+
+<pre>
+        ┌─────────────────────────────────────┐
+        │  Skill（沉淀的复用知识）              │
+        │  SKILL.md：元数据 + 正文指令          │
+        └──────────────┬──────────────────────┘
+                       │ ① 命中场景时按需加载正文
+                       ▼
+        ┌─────────────────────────────────────┐
+        │  上下文（模型此刻能看见的一切）        │
+        │  系统指令 / 历史 / Skill正文 / 工具结果 │
+        └──────────────┬──────────────────────┘
+                       │ ② 作为唯一输入
+                       ▼
+        ┌─────────────────────────────────────┐
+        │  Agent（规划 → 调工具 → 观察 → 循环）  │
+        └──────────────┬──────────────────────┘
+                       │ ③ 新信息写回上下文
+                       └──────► 回到「上下文」
+
+        ④ 反复验证有效的做法 → 固化为新的 Skill → 回到最上层
+</pre>
+
+<p><span class="tag">①</span>Skill 命中场景时才把正文加载进上下文，平时只占几条元数据。<br>
+<span class="tag">②</span>上下文是 Agent 每一轮决策的唯一输入。<br>
+<span class="tag">③</span>Agent 执行产生的新信息（观察结果、文件内容）写回上下文，影响下一轮判断。<br>
+<span class="tag">④</span>反复验证有效的做法被固化成新 Skill，闭环回到起点。</p>
+
+<h2>三、上下文如何决定 Agent 的工作</h2>
+
+<p>这是三者关系里最关键的一环，也是我学之前最容易忽略的。</p>
+
+<h3>1. 上下文是 Agent 的"唯一现实"</h3>
+<p>Agent 看起来在"自主思考"，但它每一轮决策所能依据的信息，只有上下文窗口里那点内容。
+上下文里没有的东西，对它而言就等于不存在。</p>
+<p>所以：<strong>Agent 的能力上限，不只取决于模型本身，还取决于你往上下文里放了什么。</strong>
+给同样的模型塞进不同的上下文，表现可以天差地别。</p>
+
+<h3>2. 窗口有限，长任务必然溢出</h3>
+<p>上下文窗口有容量上限（以 token 计）。Agent 跑长任务时，历史、工具返回、中间结果不断累积，
+迟早撑满。常见处理办法：</p>
+<ul>
+  <li><strong>压缩</strong>：把早期对话总结成摘要，用摘要替换原文</li>
+  <li><strong>卸载</strong>：把大段内容写进文件，上下文里只留路径和要点</li>
+  <li><strong>检索</strong>：不常驻，需要时再按相关度取回</li>
+</ul>
+<p>这也解释了为什么"把资料全塞进去"不是好办法——塞得越多，成本和延迟越高，
+而且中间部分反而更容易被忽略（即 Lost in the Middle 现象<sup>[2]</sup>）。</p>
+
+<h3>3. 上下文质量比长度更重要</h3>
+<p>我的判断：<strong>上下文工程的核心不是"塞满"，而是"让关键信息出现在模型真正会注意的位置"。</strong>
+实践中这意味着——重要约束放开头或结尾、剔除无关内容、把长文档拆成按需取用的片段。</p>
+
+<h2>四、Skill 如何沉淀可复用的任务知识</h2>
+
+<h3>1. 从"每次重说一遍"到"写一次，反复用"</h3>
+<p>没有 Skill 时，要让模型稳定产出某种格式的内容，你得每次把要求重新描述一遍，
+而且每次描述还不一样，输出自然也不稳定。Skill 把这套要求<strong>固化成一个文件</strong>：</p>
+<ul>
+  <li><strong>元数据（name / description）</strong>：常驻，让模型知道"有这么个技能、什么时候该用"</li>
+  <li><strong>正文（适用场景、输入、步骤、输出结构、自检）</strong>：命中场景时才加载进上下文</li>
+</ul>
+
+<h3>2. 按需加载本身就是一种上下文优化</h3>
+<p>这点是我学完三个概念才串起来的：<strong>Skill 的分层加载，本质是在省上下文。</strong></p>
+<p>如果每个 Skill 的正文都常驻上下文，装十个 Skill 就把窗口撑爆了。分层之后，
+平时只占几十个 token 的元数据，真正命中了才把完整正文拉进来——
+<strong>用上下文的"按需分配"，换来了可挂载能力的"几乎无限"</strong>。</p>
+<p>这也正是 Skill 和"一段长提示词"的根本区别：提示词是每次都要占用上下文的常量，
+Skill 是按需取用的可寻址资源。</p>
+
+<h3>3. Skill 是 Agent 的能力扩展槽</h3>
+<p>Agent 负责"怎么推进任务"，Skill 负责"这类任务该怎么做"。
+Agent 在循环中选择用哪个 Skill，就像技工在工序中选择用哪把工具。
+Skill 越多、写得越好，同一个 Agent 能稳定胜任的任务类型就越多。</p>
+
+<h2>五、我自己的判断</h2>
+
+<div class="mine">
+<p><strong>改变的一个看法：</strong>我原本以为 Agent 强不强主要取决于模型，
+现在觉得"喂给它的上下文质量"至少占一半。同样是写一个数据分析脚本，
+有没有把项目的目录约定、命名规范、已有工具函数放进上下文，结果差别很大。
+模型没变，变的是上下文。</p>
+
+<p><strong>另一个体会：</strong>Skill 的价值不在"省事"，而在"稳定"。
+它的真正意义是把一次偶然的好结果，变成可以重复的好结果。
+这点对做作业也一样：与其每次重新描述要求，不如写清标准，之后每次都按它来。</p>
+
+<p><strong>还没想透的问题：</strong>Skill 和"上下文里的系统提示"到底该怎么分工？
+两者都在指导模型行为。我目前的理解是——长期不变、跨任务通用的放系统提示；
+针对某类任务、需要按需加载的放 Skill。但这个划分是否站得住，还需要更多实践检验。</p>
+</div>
+
+<h2>六、资料来源</h2>
+
+<table>
+  <tr><th style="width:5%">#</th><th style="width:38%">来源</th><th style="width:14%">核验状态</th><th>支撑内容</th></tr>
+  <tr>
+    <td>[1]</td>
+    <td>Anthropic《Building effective agents》<br><a href="https://www.anthropic.com/engineering/building-effective-agents">https://www.anthropic.com/engineering/building-effective-agents</a></td>
+    <td>已核验 200</td>
+    <td>Agent 的基本结构、工作流分类</td>
+  </tr>
+  <tr>
+    <td>[2]</td>
+    <td>Liu et al.《Lost in the Middle》<br><a href="https://arxiv.org/abs/2307.03172">https://arxiv.org/abs/2307.03172</a></td>
+    <td>已核验 200</td>
+    <td>长上下文中段信息易被忽略</td>
+  </tr>
+  <tr>
+    <td>[3]</td>
+    <td>Anthropic《Effective context engineering for AI agents》<br><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents</a></td>
+    <td>已核验 200</td>
+    <td>上下文工程、按需加载策略</td>
+  </tr>
+  <tr>
+    <td>[4]</td>
+    <td>Anthropic《Equipping agents for the real world with Agent Skills》<br><a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills">https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills</a></td>
+    <td>已核验 200</td>
+    <td>Skill 的分层加载与定位</td>
+  </tr>
+  <tr>
+    <td>[5]</td>
+    <td>Anthropic 官方 Skills 发布公告<br><a href="https://www.anthropic.com/news/skills">https://www.anthropic.com/news/skills</a></td>
+    <td>已核验 200<br>（跳转至 claude.com/blog/skills）</td>
+    <td>Skill 的产品定位</td>
+  </tr>
+</table>
+
+<p class="note"><strong>未核验说明：</strong><code>docs.claude.com</code> 与 <code>docs.anthropic.com</code>
+域下的文档页在本机被重定向至 <code>claude.com/app-unavailable-in-region</code>（地区限制），
+虽然返回 200 但读不到正文，因此本文<strong>未引用</strong>其任何内容，
+也未采信其中可能存在的字段说明。</p>
+
+</body>
+</html>

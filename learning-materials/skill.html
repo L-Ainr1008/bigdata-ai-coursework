@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习资料：Skill（AI 智能体的技能 / 可复用任务知识包）</title>
+<style>
+  :root{
+    --ink:#1f2328;
+    --ink-soft:#4a5157;
+    --line:#d8dde3;
+    --line-soft:#eceff2;
+    --bg:#ffffff;
+    --bg-soft:#f6f8fa;
+    --bg-code:#f4f6f8;
+    --accent:#2c5d8a;
+    --accent-soft:#eaf1f8;
+    --warn:#8a4b00;
+    --warn-soft:#fdf3e7;
+    --good:#1e6b45;
+    --good-soft:#eaf6f0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:0 16px 80px;
+    background:#eef1f4;
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px;
+    line-height:1.7;
+  }
+  .page{
+    max-width:900px;
+    margin:0 auto;
+    background:var(--bg);
+    padding:40px 48px 56px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    box-shadow:0 1px 3px rgba(0,0,0,.06);
+  }
+  h1{
+    font-size:27px;
+    line-height:1.45;
+    margin:0 0 6px;
+    letter-spacing:.2px;
+  }
+  .subtitle{
+    color:var(--ink-soft);
+    font-size:14px;
+    margin:0 0 26px;
+    padding-bottom:18px;
+    border-bottom:2px solid var(--accent);
+  }
+  h2{
+    font-size:21px;
+    margin:44px 0 16px;
+    padding:8px 0 8px 14px;
+    border-left:5px solid var(--accent);
+    background:var(--bg-soft);
+    line-height:1.5;
+  }
+  h3{
+    font-size:17px;
+    margin:28px 0 10px;
+    color:var(--accent);
+  }
+  p{margin:0 0 14px;}
+  ul,ol{margin:0 0 14px;padding-left:26px;}
+  li{margin-bottom:8px;}
+  strong{font-weight:600;}
+  a{color:var(--accent);word-break:break-all;}
+
+  sup{color:var(--accent);font-weight:600;font-size:12px;padding-left:1px;}
+
+  .lead{
+    background:var(--accent-soft);
+    border:1px solid #cfdfef;
+    border-left:5px solid var(--accent);
+    border-radius:4px;
+    padding:16px 20px;
+    margin:0 0 18px;
+  }
+  .lead p:last-child{margin-bottom:0;}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin:14px 0 20px;
+    font-size:15px;
+    line-height:1.65;
+  }
+  th,td{
+    border:1px solid var(--line);
+    padding:10px 12px;
+    vertical-align:top;
+    text-align:left;
+  }
+  th{background:var(--bg-soft);font-weight:600;}
+  tbody tr:nth-child(even) td{background:#fbfcfd;}
+
+  pre{
+    background:var(--bg-code);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:14px 16px;
+    overflow-x:auto;
+    font-size:13.5px;
+    line-height:1.6;
+    margin:14px 0 18px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  code{
+    background:var(--bg-code);
+    border:1px solid var(--line-soft);
+    border-radius:3px;
+    padding:1px 5px;
+    font-size:13.5px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  pre code{background:none;border:none;padding:0;}
+
+  /* ---------- 流程图 ---------- */
+  .flow{
+    background:var(--bg-soft);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:22px 18px;
+    margin:18px 0 22px;
+  }
+  .flow-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:stretch;margin-bottom:6px;}
+  .fbox{
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:5px;
+    padding:11px 13px;
+    font-size:13.5px;
+    line-height:1.55;
+    flex:1 1 190px;
+    min-width:170px;
+    text-align:center;
+  }
+  .fbox b{display:block;font-size:14px;margin-bottom:3px;color:var(--accent);}
+  .fbox.l1{border-color:#b9cfe4;background:#f2f7fc;}
+  .fbox.l2{border-color:#cfe0b9;background:#f5f9ee;}
+  .fbox.l3{border-color:#e3d3a8;background:#fdf8ec;}
+  .fbox.io{border-color:#c9c9c9;background:#f2f2f2;}
+  .arrow{text-align:center;color:var(--ink-soft);font-size:17px;line-height:1;margin:6px 0 6px;}
+  .legend{
+    margin-top:16px;padding-top:12px;border-top:1px dashed var(--line);
+    font-size:13px;color:var(--ink-soft);
+  }
+  .legend span{display:inline-block;margin-right:14px;}
+
+  /* ---------- 语义块 ---------- */
+  .note{
+    border:1px solid var(--line);
+    border-left:5px solid #9aa5ad;
+    background:var(--bg-soft);
+    padding:13px 18px;
+    border-radius:4px;
+    margin:16px 0 20px;
+    font-size:15px;
+  }
+  .note p:last-child{margin-bottom:0;}
+  .warn{
+    border:1px solid #f0dcbd;
+    border-left:5px solid #d99a2b;
+    background:var(--warn-soft);
+    padding:13px 18px;
+    border-radius:4px;
+    margin:16px 0 20px;
+    font-size:15px;
+    color:#5c3300;
+  }
+  .warn p:last-child{margin-bottom:0;}
+
+  details{
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:var(--bg-soft);
+    padding:11px 16px;
+    margin:10px 0 18px;
+    font-size:15px;
+  }
+  details summary{
+    cursor:pointer;
+    font-weight:600;
+    color:var(--accent);
+    outline:none;
+    user-select:none;
+  }
+  details[open] summary{margin-bottom:9px;padding-bottom:8px;border-bottom:1px dashed var(--line);}
+  details .body{border-top:none;padding-top:2px;}
+  details .body p:first-child{margin-top:6px;}
+
+  .q{
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:16px 20px 6px;
+    margin:0 0 20px;
+    background:#fff;
+  }
+  .q .qt{font-weight:600;margin-bottom:10px;}
+  .q .tag{
+    display:inline-block;font-size:12px;font-weight:600;
+    padding:1px 8px;border-radius:10px;margin-right:8px;vertical-align:2px;
+  }
+  .tag.judge{background:var(--warn-soft);color:var(--warn);border:1px solid #e8c99a;}
+  .tag.sel{background:var(--accent-soft);color:var(--accent);border:1px solid #bcd4ea;}
+  .tag.open{background:var(--good-soft);color:var(--good);border:1px solid #a9d7c2;}
+
+  .kv{font-size:14.5px;}
+  .kv td:first-child{width:132px;font-weight:600;background:var(--bg-soft);}
+
+  .toc{
+    background:var(--bg-soft);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:14px 20px;
+    margin:0 0 30px;
+    font-size:15px;
+  }
+  .toc ol{margin:0;padding-left:22px;}
+  .toc li{margin-bottom:3px;}
+
+  .verdict{font-weight:600;color:var(--good);}
+  .verdict.no{color:#a83232;}
+
+  footer{
+    margin-top:52px;padding-top:18px;
+    border-top:1px solid var(--line);
+    font-size:13px;color:var(--ink-soft);
+  }
+  @media (max-width:640px){
+    .page{padding:24px 18px 40px;}
+    h1{font-size:22px;}
+    h2{font-size:18px;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Skill（AI 智能体的技能 / 可复用任务知识包）</h1>
+<p class="subtitle">课程：《大数据与人工智能》　｜　学习者：逢春（有 Python 基础，未系统学过 AI 理论）　｜　用途：课程作业，供逐项检查　｜　成稿日期：2026-09-05</p>
+
+<div class="toc">
+  <strong>本文结构</strong>
+  <ol>
+    <li><a href="#s1">概念速览</a></li>
+    <li><a href="#s2">学习目标</a></li>
+    <li><a href="#s3">核心问题</a></li>
+    <li><a href="#s4">核心机制</a></li>
+    <li><a href="#s5">应用场景</a></li>
+    <li><a href="#s6">易混淆点与边界</a></li>
+    <li><a href="#s7">自测题</a></li>
+    <li><a href="#s8">资料来源</a></li>
+    <li><a href="#s9">我的疑问</a></li>
+  </ol>
+</div>
+
+<!-- ===================== 1 ===================== -->
+<h2 id="s1">1. 概念速览</h2>
+
+<div class="lead">
+<p><strong>一句话定义：</strong>Skill 是存放在文件系统里的<strong>一个文件夹</strong>，它把"把某一类任务做好"所需的指令、脚本和参考资料打包在一起；智能体平时只在上下文里保留它的<strong>名字和简介</strong>，判断当前任务对得上时才把正文读进来，需要更细的细节时再往下翻<sup>[1][2]</sup>。</p>
+</div>
+
+<h3>它不是什么</h3>
+<ul>
+  <li><strong>不是一段一次性的提示词。</strong>提示词说完就散、下次要重新敲；Skill 是落在磁盘上的文件，会被反复"发现—加载"，同一次安装可以服务无数次对话<sup>[2]</sup>。</li>
+  <li><strong>不是模型微调（Fine-tuning）。</strong>它一个模型权重都不改，只是在恰当的时机往上下文里塞恰当的指令。</li>
+  <li><strong>不是工具（Tool）或插件。</strong>工具回答的是"我能按什么动作"，Skill 回答的是"这件事该怎么做"；两者不在同一层——不过 Skill 里面<em>可以</em>带着脚本，让模型当成工具直接跑<sup>[2]</sup>。</li>
+  <li><strong>不是智能体（Agent）本身。</strong>智能体是干活的角色，Skill 是它能去翻的那本手册。没有智能体，手册没人读；没有手册，智能体每次都得靠猜<sup>[3]</sup>。</li>
+</ul>
+
+<h3>一句话个人理解</h3>
+<div class="note">
+<p>我觉得 Skill 最像<strong>给新同事准备的一本操作手册</strong>：你不用每次开工前口头交代一遍"表格要用这个字体、数据要先去重、报告要分三段"，而是把这些要求写成文档放进抽屉，他自己会在合适的时候翻开照做。</p>
+<p><strong>但这个类比有三个地方会失真，必须说清楚：</strong></p>
+<ul style="margin-top:8px;">
+  <li><strong>手册不会自己动手，Skill 也不保证模型一定照做。</strong>加载不等于服从。模型读完 Skill 之后，仍然可能按自己的理解发挥，或者压根没触发这本"手册"。</li>
+  <li><strong>人类新同事看手册是"读一遍就记住了"，模型不是。</strong>模型没有跨会话的记忆，每次对话都要重新走一遍"发现—加载"的流程，上下文一清空就全忘了。这是 Skill 存在的根本原因之一，也是它和"培训一个人"最大的差别。</li>
+  <li><strong>手册会过期，Skill 也会，而且更隐蔽。</strong>公司流程变了，旧手册不会自己报错，只会让你在新流程下做出旧格式的东西。Skill 维护成本就出在这里。</li>
+</ul>
+</div>
+
+<!-- ===================== 2 ===================== -->
+<h2 id="s2">2. 学习目标</h2>
+<ol>
+  <li><strong>能自己说清</strong> Skill 是什么、解决什么问题，并且能举出至少一个"不适合做成 Skill"的反例——而不是只会背定义。</li>
+  <li><strong>能看懂并写得出</strong>一个最小可用的 <code>SKILL.md</code>：知道 <code>name</code> 和 <code>description</code> 是必需的，知道正文该写什么、什么该拆到附属文件里去<sup>[2]</sup>。</li>
+  <li><strong>能解释"渐进式披露"（progressive disclosure）</strong>为什么要分三层，以及每一层分别在什么时候进入上下文、代价是什么<sup>[2]</sup>。</li>
+  <li><strong>能把 Skill、提示词、Tool/MCP、Agent 四者的分工讲明白</strong>，并说明它们怎么配合，而不是互相替代<sup>[1][2][3][4]</sup>。</li>
+</ol>
+
+<!-- ===================== 3 ===================== -->
+<h2 id="s3">3. 核心问题</h2>
+<ol>
+  <li><strong>既然上下文窗口越来越大，为什么还要费劲分层加载？</strong>把全部指令一次性塞进去不是更简单吗？（答案见第 4 节与第 7 节第 1 题）</li>
+  <li><strong><code>description</code> 到底该写多长？</strong>写短了模型匹配不到、技能形同虚设；写长了它又常驻在上下文里占地方。这个取舍的边界在哪？（答案见第 4 节要素二、第 6 节第 4 条）</li>
+  <li><strong>什么时候该写 Skill，什么时候该写成脚本/工具？</strong>如果一件事用 Python 脚本能稳定跑通，还需要 Skill 吗？（答案见第 4 节要素五、第 6 节边界小节）</li>
+</ol>
+
+<!-- ===================== 4 ===================== -->
+<h2 id="s4">4. 核心机制</h2>
+
+<p>Skill 的运行机制可以拆成五个要素。它们的关系不是并列的，而是一条<strong>有先后、有依赖</strong>的链：要素二是要素三的入场券，要素三是要素四的目录，要素五则挂在正文下面按需调用。</p>
+
+<h3>要素一：载体 —— Skill 是一个目录，<code>SKILL.md</code> 是它的入口</h3>
+<p>最简形态下，一个 Skill 就是一个文件夹，里面有一个 <code>SKILL.md</code>；复杂一点的会带上参考文档、模板和脚本<sup>[2]</sup>。</p>
+<p><strong>为什么需要它：</strong>因为"文件夹"意味着它可以被<strong>文件系统</strong>管理——能被列出来、能被<code>cd</code>进去、能按文件名读取。Skill 的按需加载能力，本质上是借了"文件可以只读其中一部分"这个古老的特性。如果 Skill 只是一个字符串常量，就只能整段进上下文，没有"按需"可言。</p>
+
+<h3>要素二：第一层 —— YAML 元数据（<code>name</code> + <code>description</code>）</h3>
+<p>文件开头必须是 YAML frontmatter，其中 <code>name</code> 和 <code>description</code> 是<strong>必需</strong>的。智能体在<strong>启动时，会把每一个已安装技能的 name 和 description 预加载进系统提示</strong>——注意是"全部技能、但只有这两项"<sup>[2]</sup>。</p>
+<p><strong>为什么需要它：</strong>这一层的作用是<strong>让模型"不读全书也能判断该不该读"</strong>。它必须常驻，否则模型无从知道自己手上有这个技能；它也必须极短，否则装 50 个技能光目录就把上下文吃掉了。这个"既要常驻、又要极短"的矛盾，是理解 Skill 设计的关键。</p>
+<p class="note" style="margin-top:10px;"><strong>一个容易被忽略的推论：</strong>正因为 <code>description</code> 常驻，你的技能数量会线性地侵蚀上下文预算。<code>description</code> 写 50 字还是 500 字，在装了 30 个技能时是几十倍的区别。这也是官方强调"只在需要时加载"的原因<sup>[1][2]</sup>。</p>
+
+<h3>要素三：第二层 —— <code>SKILL.md</code> 正文</h3>
+<p>当模型判断某个技能与当前任务相关时，才会把完整的 <code>SKILL.md</code> 读进上下文<sup>[2]</sup>。正文写的是"这件事具体怎么做"：步骤、检查清单、输入输出约定、反例。</p>
+<p><strong>为什么需要它：</strong>它是"判断相关"和"动手执行"之间的桥。没有这一层，模型只有一句简介，知道"有本手册"却不知道手册里写了什么。</p>
+
+<h3>要素四：第三层及更高 —— 附属文件</h3>
+<p>正文里可以按文件名引用更多文件（如 <code>reference.md</code>、<code>forms.md</code>），这些细节<strong>只在特定子场景下才被需要</strong>，模型可以选择性地去导航和发现<sup>[2]</sup>。</p>
+<p><strong>为什么需要它：</strong>这是"上下文量近乎无限"的技术来源。既然不必一次读完，一个技能包里能装多少内容就不再受上下文窗口限制——官方的说法是 <em>effectively unbounded</em><sup>[2]</sup>。这一步把 Skill 从"长一点的提示词"抬升成了"一个可伸缩的知识库"。</p>
+
+<h3>要素五：可执行脚本（可选，但很关键）</h3>
+<p>Skill 里可以放代码，让模型<strong>直接运行而不必把脚本或数据读进上下文</strong>。而且因为代码是确定性的，同样的输入会得到同样的输出，这一点是逐 token 生成做不到的<sup>[2]</sup>。官方的例子是：用 token 生成去排序一个列表，远比直接跑一个排序算法昂贵<sup>[2]</sup>。</p>
+<p><strong>为什么需要它：</strong>它划出了 Skill 的能力边界——<strong>能用代码确定性解决的，就别让模型去"生成"</strong>。逢春有 Python 基础，这一点特别值得记：Skill 不是让模型变聪明，而是让它少干不该它干的活。</p>
+
+<h3>机制流程图</h3>
+<div class="flow">
+  <div class="flow-row">
+    <div class="fbox io"><b>① 启动</b>智能体就绪</div>
+    <div class="fbox l1"><b>② 预加载</b>所有技能的<br><code>name</code> + <code>description</code><br><span style="font-size:12px;color:#6b747b;">常驻 system prompt｜第一层</span></div>
+    <div class="fbox io"><b>③ 用户提任务</b>"用 X 技能做 Y"</div>
+  </div>
+  <div class="arrow">▼</div>
+  <div class="flow-row">
+    <div class="fbox io"><b>④ 扫描匹配</b>拿任务去比对所有<br>技能的 description</div>
+  </div>
+  <div class="arrow">▼</div>
+  <div class="flow-row">
+    <div class="fbox l2"><b>⑤ 命中 → 读正文</b>整个 <code>SKILL.md</code><br>读入上下文<br><span style="font-size:12px;color:#6b747b;">按需｜第二层</span></div>
+    <div class="fbox io" style="flex:0 1 150px;"><b>未命中</b>不加载，<br>当作没有这个技能</div>
+  </div>
+  <div class="arrow">▼</div>
+  <div class="flow-row">
+    <div class="fbox l3"><b>⑥ 需要更细？</b>读 <code>reference.md</code> 等<br>附属文件<br><span style="font-size:12px;color:#6b747b;">再按需｜第三层及更高</span></div>
+    <div class="fbox l3"><b>⑦ 需要动手？</b>直接<strong>运行</strong>脚本<br>（不读进上下文）<br><span style="font-size:12px;color:#6b747b;">确定性、省 token</span></div>
+  </div>
+  <div class="arrow">▼</div>
+  <div class="flow-row">
+    <div class="fbox io"><b>⑧ 执行任务</b>产出结果</div>
+  </div>
+  <div class="legend">
+    <span>■ 灰 = 流程/输入输出</span>
+    <span>■ 蓝 = 第一层（常驻）</span>
+    <span>■ 绿 = 第二层（按需）</span>
+    <span>■ 黄 = 第三层及更高（再按需）</span>
+  </div>
+</div>
+
+<h3>真实示例：仓库里已写好的 <code>concept-study-generator</code></h3>
+<p>逢春的仓库里已经有一份真实的 Skill，路径是 <code>.workbuddy/skills/concept-study-generator/SKILL.md</code>（<strong>本页就是照着它生成的</strong>）。用它来对一遍上面的要素，比看抽象描述清楚得多：</p>
+
+<pre><code>---
+name: concept-study-generator
+description: 把任意一个新概念（如 Agent、大模型的上下文、RAG、向量数据库、
+  思维链等）加工成一份结构化的 HTML 学习资料。输出包含学习目标、核心问题、
+  机制拆解、应用场景、易混淆点辨析、自测题与可核查来源。适用于课程作业中
+  "学透一个概念并留下可复查材料"的场景；不适用于需要逐行调试的代码任务
+  或需要实时数据的问题。
+---
+
+# 概念学习资料生成器（concept-study-generator）
+
+## 一、适用场景
+## 二、不适用场景
+## 三、输入信息
+## 四、生成步骤        ← 步骤 1~7
+## 五、输出结构        ← 固定的 9 节
+## 六、资料来源要求
+## 七、自检要求        ← 交付前逐条打勾
+## 八、调用示例
+## 九、输出文件约定
+## 十、与其他资料的关系
+</code></pre>
+
+<p><strong>它为什么这样设计，逐条对上机制：</strong></p>
+<table>
+  <thead><tr><th style="width:150px;">它的写法</th><th>对应哪条机制 / 为什么这样写</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>name</code> 用连字符小写<br><code>concept-study-generator</code></td>
+      <td>第一层元数据。<code>name</code> 是技能的唯一标识，模型靠它引用和定位，所以必须稳定、可读、不含空格。</td>
+    </tr>
+    <tr>
+      <td><code>description</code> 里<strong>同时写了"适用于"和"不适用于"</strong></td>
+      <td>这是这份 Skill 写得最好的一处。<code>description</code> 既要<strong>勾住</strong>匹配（列举 Agent、RAG、向量数据库等触发词），又要用"不适用于"把不该触发的场景挡掉。因为这一层常驻 system prompt，它是唯一能控制"是否被误触发"的闸门。</td>
+    </tr>
+    <tr>
+      <td>正文分十节，是一套<strong>操作流程</strong>而非知识罗列</td>
+      <td>第二层正文的职责是"告诉模型一步步怎么做"。第三节用表格列出<strong>输入缺失时的默认处理</strong>，第七节给出<strong>交付前自检清单</strong>——这两处是在替模型把边界情况提前兜住，属于典型的"把个人经验固化"。</td>
+    </tr>
+    <tr>
+      <td>第十节要求检查 <code>learning-materials/</code> 下是否已有同概念文件</td>
+      <td>防止重复生成。这也是本页会去交叉引用已有的 <code>agent.html</code>、<code>llm-context.html</code> 的原因。</td>
+    </tr>
+    <tr>
+      <td><strong>没有</strong>拆分第三层附属文件，<strong>也没有</strong>脚本</td>
+      <td>见下方"一处诚实的批评"。</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="warn">
+<p><strong>一处诚实的批评（对自己的示例挑毛病）：</strong>按要素四的设计原则，这份 <code>concept-study-generator</code> 其实<strong>用得不够好</strong>。它的正文把"输出结构""资料来源要求""自检要求"全都平铺在一个 <code>SKILL.md</code> 里，而其中相当一部分（比如那 14 条自检清单）只在<strong>收尾阶段</strong>才用得上，却在第二层就被整体读入了。</p>
+<p>更贴合机制的做法是：正文只留主干流程，把自检清单拆到 <code>checklist.md</code>、把排版规范拆到 <code>style-guide.md</code>，让模型在收尾时才去翻。另外它<strong>完全没有用到要素五</strong>——像"来源链接批量核验"这种事，本该写成 Python 脚本跑，而不是让模型逐条生成。反过来说，这恰好证明了：<strong>知道 Skill 的结构 ≠ 用好了 Skill 的分层思想</strong>。这也是我学完这个概念后，回头看自己仓库里这份文件最大的收获。</p>
+</div>
+
+<!-- ===================== 5 ===================== -->
+<h2 id="s5">5. 应用场景</h2>
+
+<p>选一个<strong>逢春自己真实会遇到的、可复现</strong>的场景：课程要求"学透一个概念，产出一份可复查的学习资料"。这个任务他这学期要做不止一次——前面已经做过 Agent 和大模型的上下文，这次是 Skill，后面还会有 RAG、向量数据库等等<sup>[3]</sup>。</p>
+
+<h3>输入</h3>
+<pre><code>调用 concept-study-generator
+概念：Skill（AI 智能体的技能）
+学科背景：计算机与人工智能通识
+学习者基础：已掌握 Python 基础，未系统学过 AI 理论
+资料用途：课程作业，需要可核查来源
+输出路径：learning-materials/skill.html</code></pre>
+
+<h3>处理（对应核心机制的哪几个要素）</h3>
+<table>
+  <thead><tr><th style="width:60px;">步骤</th><th style="width:150px;">用到的要素</th><th>具体发生了什么</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>要素二（第一层）</td><td>启动时，<code>concept-study-generator</code> 的 <code>name</code> + <code>description</code> 已在 system prompt 里。用户一句"调用 concept-study-generator"，与 description 中"加工成结构化 HTML 学习资料""课程作业"等表述匹配上。</td></tr>
+    <tr><td>2</td><td>要素三（第二层）</td><td>完整 <code>SKILL.md</code> 被读入上下文，模型这才"知道"：要先定位界定、再拆机制、再设计场景、再整理混淆点、再核验来源、最后出 5 节结构的 HTML。</td></tr>
+    <tr><td>3</td><td>正文的第三节表格</td><td>输入项里"学科背景"等选填项用户没给，按表格的<strong>默认规则</strong>补全为"计算机与人工智能通识"，而不是反问用户或留空。</td></tr>
+    <tr><td>4</td><td>正文的第六节</td><td>来源必须<strong>实际访问验证</strong>；访问不通的如实标注，严禁凭印象编造 URL。</td></tr>
+    <tr><td>5</td><td>正文的第七节</td><td>逐条跑 14 项自检清单，任一条不通过就重写。</td></tr>
+    <tr><td>6</td><td>正文的第十节</td><td>检查 <code>learning-materials/</code> 下已有 <code>agent.html</code>、<code>llm-context.html</code>，于是在易混淆点中主动交叉引用这两个概念。</td></tr>
+  </tbody>
+</table>
+
+<h3>输出</h3>
+<p><code>learning-materials/skill.html</code>——一个自包含的单文件网页，9 节结构，含流程图、易混淆点表格、5 道自测题、5 条已核验来源。也就是你正在看的这一页。</p>
+
+<h3>如果不用 Skill，同样的事会怎么变糟</h3>
+<table>
+  <thead><tr><th style="width:110px;">问题</th><th>不用 Skill（每次手敲提示词）</th><th>用了 Skill</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>重复描述</td>
+      <td>每学一个新概念都要重新打一遍"要有学习目标、核心问题、易混淆点、自测题、来源表……"。漏一项就要返工，而且漏哪次全看当次状态。</td>
+      <td>结构写死在文件里，一次写对，之后每次自动生效。</td>
+    </tr>
+    <tr>
+      <td>输出不一致</td>
+      <td>上次要求"易混淆点要说清为什么会错"，这次忘了写，产出的三份资料格式各不相同，交给老师看不出是同一套标准做的。</td>
+      <td>三份资料（<code>agent.html</code>、<code>llm-context.html</code>、<code>skill.html</code>）章节结构一致，可横向对比。</td>
+    </tr>
+    <tr>
+      <td>经验无法累积</td>
+      <td>学到"来源必须实际核验"这个教训，只在脑子里，下次忙起来还是会犯。</td>
+      <td>教训被固化成正文第六节的硬约束，变成流程的一部分，不依赖记性。</td>
+    </tr>
+    <tr>
+      <td>上下文浪费</td>
+      <td>要把所有要求每次都完整说一遍，或者塞一个超长 system prompt，不管这次任务用不用得上。</td>
+      <td>平时只有两行元数据常驻，正文按需才读。</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ===================== 6 ===================== -->
+<h2 id="s6">6. 易混淆点与边界</h2>
+
+<h3>6.1 五条易混淆点</h3>
+<table>
+  <thead><tr><th style="width:180px;">条目</th><th style="width:230px;">常见误解</th><th style="width:230px;">正确说法</th><th>为什么会错</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>① Skill vs 提示词</strong><sup>[2]</sup></td>
+      <td>"Skill 就是存起来的长提示词，本质一样。"</td>
+      <td>提示词是<strong>一次性全部进入上下文</strong>的文本；Skill 是文件，只有元数据常驻，正文和附属文件按需分层读取。两者在"占用多少上下文、什么时候占用"上根本不同。</td>
+      <td>因为<strong>最终效果看起来一样</strong>——都是"给模型一些文字，它照着做"。人容易从"结果相似"倒推"本质相同"，忽略了加载时机和代价的差异。而这个差异恰恰是 Skill 的全部价值所在。</td>
+    </tr>
+    <tr>
+      <td><strong>② Skill vs 工具 / MCP</strong><sup>[2][4][5]</sup></td>
+      <td>"Skill 和 MCP 服务器是一回事，都是给模型扩展能力。"</td>
+      <td>两者是<strong>互补而非替代</strong>。MCP 解决"能连上哪些外部系统"<sup>[4]</sup>；Skill 解决"连上之后，这一整套活该怎么干"。而且 Skill 里<em>可以</em>打包脚本当工具跑<sup>[2]</sup>，所以 Skill 是<strong>包住</strong>工具的一层，不是和它并列的一层。</td>
+      <td>因为两者<strong>装上都"让模型变强了"</strong>，从使用者视角看不出区别。加上 Skill 可以包含脚本，更容易让人以为"Skill = 工具"。区别在于：工具是<strong>能力</strong>（能不能做），Skill 是<strong>程序性知识</strong>（该怎么做）。</td>
+    </tr>
+    <tr>
+      <td><strong>③ Skill vs Agent</strong><sup>[3]</sup></td>
+      <td>"一个装了很多 Skill 的 Agent 就等于一个更强的 Agent，两者是包含关系。"</td>
+      <td>Agent 的定义特征是<strong>由 LLM 动态决定自己的流程与工具使用、并保有对任务完成方式的控制权</strong><sup>[3]</sup>。Skill 不参与这个决策，它只是决策过程中可被查阅的资料。装了 Skill 的 Agent 仍是 Agent，只是手边多了手册。</td>
+      <td>因为 Skill 确实改变了 Agent 的行为表现，容易把"<strong>改变了输出</strong>"当成"<strong>改变了架构</strong>"。建议对照仓库里已有的 <code>agent.html</code> 一起看：Agent 讲的是"谁在做决定"，Skill 讲的是"决定时手边有什么资料"。</td>
+    </tr>
+    <tr>
+      <td><strong>④ <code>description</code> 的写法</strong><sup>[2]</sup></td>
+      <td>"description 写得越详细越好，这样模型更容易匹配上。"</td>
+      <td><code>description</code> <strong>常驻 system prompt，而且是每个已安装技能各占一份</strong><sup>[2]</sup>。它是"检索用的索引"，不是"使用说明"。索引的价值在于<strong>用最少的字把对的请求钩住、把错的请求挡掉</strong>，堆细节反而抬高成本、稀释信号。</td>
+      <td>这是<strong>把"信息量"当成了"有效性"</strong>。人写文档习惯"多多益善"，但常驻内容的计价方式是"每个 token × 技能数 × 每轮对话"。正确的写法（可对照 <code>concept-study-generator</code>）：<strong>正向触发词 + 反向排除条件</strong>，其余全交给正文。</td>
+    </tr>
+    <tr>
+      <td><strong>⑤ "加载了" ≠ "会照做"</strong><sup>[2]</sup></td>
+      <td>"只要 Skill 被加载了，输出就一定会符合里面的规范。"</td>
+      <td>Skill 提供的是<strong>指令</strong>，不是<strong>约束</strong>。模型读完后仍可能不照做、做一半、或理解偏。真正要"保证"的部分，应该写成<strong>可执行脚本</strong>（确定性）或<strong>交付前自检清单</strong>（靠流程兜底），而不是指望模型自觉遵守文字约定<sup>[2]</sup>。</td>
+      <td>这是最普遍的一类错误：<strong>把"能力"当成"必然行为"</strong>。看到模型能做到，就以为它每次都会做到。这也解释了为什么 <code>concept-study-generator</code> 要专门设第七节自检清单——它是对"模型不一定照做"这件事的显式防御。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>6.2 使用边界</h3>
+
+<p><strong>什么不适合做成 Skill：</strong></p>
+<table>
+  <thead><tr><th style="width:170px;">场景</th><th>为什么不适合 / 该怎么做</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>需要实时数据的任务<br>（今日股价、最新新闻）</td>
+      <td>Skill 是<strong>静态文件</strong>，写出来那一刻就冻结了。它擅长存"怎么查、怎么整理"，不擅长存"查到的结果"<sup>[2]</sup>。实时数据要靠工具/检索去取，Skill 只管取回来之后怎么加工。</td>
+    </tr>
+    <tr>
+      <td>能用代码确定性解决的重复劳动</td>
+      <td>比如"批量核验 5 个链接是否返回 200"。这类事该写成脚本放进 Skill（要素五），<strong>而不是写成一大段让模型模仿的操作说明</strong><sup>[2]</sup>。让模型逐 token 生成 curl 的结果，既贵又不可靠。</td>
+    </tr>
+    <tr>
+      <td>只用一次的任务</td>
+      <td>Skill 的收益来自<strong>复用</strong>。写一份要花时间，还要维护，只用一次就是纯亏。直接写提示词即可。</td>
+    </tr>
+    <tr>
+      <td>没有可核查来源支撑的内部概念</td>
+      <td>以 <code>concept-study-generator</code> 自己的规定为例：概念本身不存在可核查的公开来源时，会直接触发来源校验失败<sup>[2]</sup>。这时该改方式，不要硬套。</td>
+    </tr>
+    <tr>
+      <td>纯知识性、模型本来就知道的内容</td>
+      <td>没必要教模型"什么是 Python 的 for 循环"。Skill 的价值在于沉淀<strong>模型不知道的、你专属的</strong>流程与标准。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>6.3 维护成本</h3>
+<ul>
+  <li><strong>Skill 会腐化，而且不会报错。</strong>流程变了、工具接口改了，旧 Skill 不会抛异常，只会安静地引导模型按过时的方式做事。<code>concept-study-generator</code> 里的默认路径、章节结构一旦改动，所有历史产出就与现行规范不一致了。</li>
+  <li><strong>技能越多，常驻成本越高。</strong>每加一个 Skill，就多一份 <code>description</code> 永久占用 system prompt。这是<strong>随技能数量线性增长</strong>的固定开销，装到几十个时必须重新审视每一条 <code>description</code> 的长度。</li>
+  <li><strong>改动的波及面不透明。</strong>改一个 <code>SKILL.md</code>，所有依赖它的历史任务产出都不会自动更新，也没有机制告诉你"哪些旧结果已经过时了"。</li>
+</ul>
+
+<h3>6.4 技能之间冲突怎么办</h3>
+<p>官方把"可组合（Composable）"列为 Skill 的四大特性之一，并称 Claude 会自动判断需要哪些技能并协调它们的使用<sup>[1]</sup>。但作为使用者，我倾向于<strong>不把这件事当成理所当然</strong>——结合 6.1 的第 ⑤ 条（加载 ≠ 照做）来看，"自动协调"本身也是模型的一次判断，同样可能出错。可操作的做法是：</p>
+<ol>
+  <li><strong>先在 <code>description</code> 里划清地盘。</strong>这是唯一常驻、也是唯一能在"加载之前"起作用的闸门。像 <code>concept-study-generator</code> 那样把"不适用于"明写进去，是成本最低的防冲突手段。</li>
+  <li><strong>重叠区域写清优先级。</strong>两个技能都能沾边的任务，在各自正文里指明"若同时涉及 A 与 B，以 A 为准"，别让模型自己猜。</li>
+  <li><strong>能合并就合并。</strong>两个技能如果 80% 的场景都同时触发，说明拆错了粒度，合成一个、用第三层附属文件做分支，比留着它们互相打架更省事。</li>
+  <li><strong>靠输出自检兜底。</strong>把"检查是否误用了不该用的技能"写进自检清单——这又是 <code>concept-study-generator</code> 第七节那种思路的延伸。</li>
+</ol>
+
+<!-- ===================== 7 ===================== -->
+<h2 id="s7">7. 自测题</h2>
+
+<div class="q">
+  <p class="qt"><span class="tag judge">陷阱判断</span>1. 判断题：为了让模型充分了解一个技能，Skill 的正文和附属参考文件会在对话开始时就全部加载进上下文，这样模型才能随时调用其中的细节。</p>
+  <details>
+    <summary>查看答案与解析</summary>
+    <div class="body">
+      <p><span class="verdict no">✗ 错误。</span>这句话听起来很"有道理"（信息越全越好），但它描述的恰恰是 Skill 要<strong>避免</strong>的做法。</p>
+      <p>正确机制是：<strong>启动时只有全部技能的 <code>name</code> + <code>description</code> 被预加载进 system prompt</strong>（第一层）；模型判断任务相关后，才把 <code>SKILL.md</code> 正文读进上下文（第二层）；附属的 <code>reference.md</code> 一类文件属于第三层及更高，由模型<strong>按需</strong>去导航发现<sup>[2]</sup>。</p>
+      <p><strong>为什么这是陷阱：</strong>它把"传统长提示词的做法"伪装成了"Skill 的做法"。如果真的全部预加载，就退化成了普通长提示词，装几个技能上下文就爆了——Skill 的整个设计（官方称之为渐进式披露）就是为了解决这个<sup>[2]</sup>。记住这句判断标准：<strong>凡是"一次性全塞进上下文"的描述，都不是 Skill。</strong></p>
+    </div>
+  </details>
+</div>
+
+<div class="q">
+  <p class="qt"><span class="tag sel">选择</span>2. 一个技能包里有一份"表单填写说明"，只在极少数需要填表的子任务里才用得上。按渐进式披露的设计原则，它应该放在哪里？</p>
+  <p style="margin-left:2px;">A. 写进 <code>description</code>，让模型一眼就看到<br>
+  B. 写在 <code>SKILL.md</code> 正文里<br>
+  C. 拆成独立文件（如 <code>forms.md</code>），由正文引用<br>
+  D. 不放进技能包，每次临时告诉模型</p>
+  <details>
+    <summary>查看答案与解析</summary>
+    <div class="body">
+      <p><span class="verdict">✓ C。</span>这正是官方示例中的做法：把表单填写说明移到单独文件，让技能正文保持精简，相信模型只在真正填表时才会去读它<sup>[2]</sup>。</p>
+      <ul>
+        <li><strong>A 错</strong>：<code>description</code> 常驻 system prompt，把低频细节放进去是永久占用上下文，最浪费的位置。</li>
+        <li><strong>B 错</strong>：正文一旦命中就会整体读入，低频内容混进去会拖累每一次命中。</li>
+        <li><strong>D 错</strong>：那就退回"每次手动交代"，Skill 的复用价值没了。</li>
+      </ul>
+      <p>判断口诀：<strong>越低频、越细、越只在特定子场景用到的内容，就该放越深的层。</strong></p>
+    </div>
+  </details>
+</div>
+
+<div class="q">
+  <p class="qt"><span class="tag sel">选择</span>3. 逢春想让模型每次都把一组 20 个来源链接核验一遍返回码。他应该？</p>
+  <p style="margin-left:2px;">A. 在 Skill 正文里详细写出 curl 命令的格式，让模型照着生成<br>
+  B. 写一个 Python 脚本放进技能包，让模型直接运行它<br>
+  C. 在 <code>description</code> 里强调"必须核验来源"<br>
+  D. 每次对话时手动提醒模型</p>
+  <details>
+    <summary>查看答案与解析</summary>
+    <div class="body">
+      <p><span class="verdict">✓ B。</span>技能里的代码可以被直接运行，<strong>既不必把脚本也不必把数据读进上下文</strong>；而且代码是确定性的，同一个输入永远得到同样的输出，这一点逐 token 生成本质上做不到<sup>[2]</sup>。</p>
+      <p>A 是很多人的第一直觉，但它让模型去"生成"本该"计算"的结果——既贵又可能出错。C 只解决了"要不要做"，没解决"怎么做才可靠"。D 完全放弃了复用。</p>
+      <p><strong>这道题对应核心问题 3</strong>：能用代码确定性解决的，就不要让模型生成。逢春有 Python 基础，这正是他在 Skill 里最能发挥优势的地方。</p>
+    </div>
+  </details>
+</div>
+
+<div class="q">
+  <p class="qt"><span class="tag judge">判断</span>4. 判断题：只要写好了 <code>SKILL.md</code> 并且模型成功加载了它，产出的结果就一定符合里面规定的格式。</p>
+  <details>
+    <summary>查看答案与解析</summary>
+    <div class="body">
+      <p><span class="verdict no">✗ 错误。</span>Skill 提供的是<strong>指令</strong>而非<strong>约束</strong>。加载不等于服从，模型读完仍可能不照做、只做一半，或者压根没触发这个技能。</p>
+      <p>想要提高可靠性，有三个层次：<strong>能用脚本确定的就写成脚本</strong>（最可靠）；<strong>把验收标准写成交付前的自检清单</strong>，让模型逐条打勾（靠流程兜底，<code>concept-study-generator</code> 第七节就是这个思路）；<strong>把边界条件写进正文</strong>（最弱，依赖模型自觉遵守）。</p>
+      <p>这题考的是 6.1 第 ⑤ 条：<strong>不要把"模型有能力做到"当成"模型每次都会做到"。</strong></p>
+    </div>
+  </details>
+</div>
+
+<div class="q">
+  <p class="qt"><span class="tag open">简答</span>5. 结合仓库里已有的 <code>agent.html</code>（智能体）和 <code>llm-context.html</code>（上下文窗口）两份资料，说明：Skill 的"分层加载"设计，到底在优化什么资源？如果上下文窗口是无限的，Skill 还有必要存在吗？</p>
+  <details>
+    <summary>查看答案与解析</summary>
+    <div class="body">
+      <p><strong>第一问：</strong>优化的是<strong>上下文窗口</strong>这一稀缺资源（可对照 <code>llm-context.html</code> 复习）。三个具体表现：① 平时只让两行元数据常驻，把常驻成本压到最低；② 正文命中才读，避免无关内容占位；③ 第三层按需再读，使得单个技能能装的内容量"近乎无限"<sup>[2]</sup>。此外还有个隐性收益——上下文越干净，模型注意力越集中，这不只是"省钱"问题。</p>
+      <p><strong>第二问（开放题，言之成理即可）：</strong>我的看法是<strong>仍然有必要，但价值重心会转移</strong>。</p>
+      <ul>
+        <li><strong>仍然成立的价值：</strong>复用与一致性（不用每次重述要求）、经验固化（教训写进流程而不靠记性）、可移植（同一份技能跨应用复用<sup>[1]</sup>）、以及"把确定性的活交给脚本"带来的可靠性<sup>[2]</sup>。这些都和上下文大小无关。</li>
+        <li><strong>会消失的价值：</strong>分层加载带来的 token 与注意力节省。如果上下文无限，"分三层"就纯粹是多余的复杂度，直接全塞进去更简单。</li>
+      </ul>
+      <p>换句话说，<strong>分层是手段不是目的</strong>——它是"上下文稀缺"这个约束下的最优解。约束变了，手段就该跟着变。能看出这一点，说明理解了机制背后的<em>为什么</em>，而不只是记住了"有三层"。</p>
+    </div>
+  </details>
+</div>
+
+<!-- ===================== 8 ===================== -->
+<h2 id="s8">8. 资料来源</h2>
+
+<p>以下 5 条来源<strong>均于 2026-09-05 在本机用 curl 实际访问核验</strong>，返回 HTTP 200，并逐条抓取页面内容确认标题与正文可读（非地区限制跳转页）。核验工具：<code>curl -sS -L --max-time 30 -o file -w "%{http_code} %{size_download}"</code>。</p>
+
+<table>
+  <thead>
+    <tr><th style="width:30px;">#</th><th style="width:210px;">来源</th><th style="width:95px;">核验状态</th><th style="width:150px;">支撑了本文哪部分</th><th>说明</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>[1]</td>
+      <td><strong>Introducing Agent Skills</strong><br>Anthropic 官方发布公告<br>作者：Anthropic<br>发布 2025-10-16，更新 2025-12-18<br><a href="https://www.anthropic.com/news/skills">https://www.anthropic.com/news/skills</a><br><span style="font-size:12.5px;color:#6b747b;">（自动跳转至 https://claude.com/blog/skills）</span></td>
+      <td><strong>已核验 200</strong><br><span style="font-size:12.5px;">511,626 字节<br>已确认无地区限制</span></td>
+      <td>第 1 节定义；第 4 节"按需加载"的价值；第 6.4 节可组合性；第 5 节"不用 Skill 会怎样"</td>
+      <td>定义了 Skill 是"包含指令、脚本与资源的文件夹，Claude 在需要时加载"，并列出 Composable / Portable / Efficient / Powerful 四个特性；明确指出 Claude 会扫描可用技能，命中后"只加载所需的最少信息与文件"。<br><br><strong>注意：</strong>该发布公告<strong>未出现</strong>"progressive disclosure"这一术语，也<strong>未说明</strong>加载分为几层。本文凡涉及分层机制的论述，均引自 [2]，不引自本条。</td>
+    </tr>
+    <tr>
+      <td>[2]</td>
+      <td><strong>Equipping agents for the real world with Agent Skills</strong><br>Anthropic 工程博客（技术深潜）<br>作者：Barry Zhang、Keith Lazuka、Mahesh Murag<br>发布 2025-10-16<br><a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills">https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills</a></td>
+      <td><strong>已核验 200</strong><br><span style="font-size:12.5px;">175,037 字节<br>已确认无地区限制</span></td>
+      <td><strong>第 4 节全部五个要素</strong>（分层机制的<strong>唯一</strong>来源）；第 6.1 节①②④⑤；第 6.2 节；第 7 节第 1、2、3 题</td>
+      <td><strong>本文最核心的一手来源。</strong>明确提出渐进式披露（progressive disclosure）是核心设计原则，并定义了三个层级：元数据为第一层（启动时预加载进 system prompt）、正文为第二层、附属文件为第三层及更高；说明 <code>SKILL.md</code> 必须以 YAML frontmatter 开头且 <code>name</code>、<code>description</code> 为必需；说明技能可含脚本并被直接运行以获得确定性，且因不必整读而"上下文量近乎无限"。</td>
+    </tr>
+    <tr>
+      <td>[3]</td>
+      <td><strong>Building effective agents</strong><br>Anthropic 工程博客<br>作者：Erik S.、Barry Zhang<br>发布 2024-12-19<br><a href="https://www.anthropic.com/engineering/building-effective-agents">https://www.anthropic.com/engineering/building-effective-agents</a></td>
+      <td><strong>已核验 200</strong><br><span style="font-size:12.5px;">211,373 字节<br>已确认无地区限制</span></td>
+      <td>第 1 节"它不是智能体"；第 6.1 节③（Skill vs Agent）；第 2 节学习目标 4</td>
+      <td>给出区分工作流与智能体的经典定义：Workflows 中 LLM 与工具通过<strong>预定义代码路径</strong>编排，Agents 则由 LLM <strong>动态决定自身流程与工具使用</strong>并保有控制权。也提出基础构建块是具备 retrieval、tools、memory 的增强型 LLM——这三者是"能力"，恰与 Skill 的"程序性知识"形成对照。</td>
+    </tr>
+    <tr>
+      <td>[4]</td>
+      <td><strong>Model Context Protocol（MCP）官方文档</strong><br>Model Context Protocol<br><a href="https://modelcontextprotocol.io/">https://modelcontextprotocol.io/</a><br><span style="font-size:12.5px;color:#6b747b;">（自动跳转至 /docs/getting-started/intro）</span></td>
+      <td><strong>已核验 200</strong><br><span style="font-size:12.5px;">279,547 字节<br>已确认无地区限制</span></td>
+      <td>第 6.1 节②（Skill vs 工具 / MCP）</td>
+      <td>用于界定 MCP 的职责边界，以说明 Skill 与 MCP 是互补而非替代关系。页面自述 MCP 是一个开放协议，并以"USB-C 接口"作类比：正如 USB-C 提供连接电子设备的标准化方式，MCP 提供连接 AI 应用与外部系统的标准化方式。即 MCP 管"连得上"，Skill 管"连上后怎么干"。</td>
+    </tr>
+    <tr>
+      <td>[5]</td>
+      <td><strong>Toolformer: Language Models Can Teach Themselves to Use Tools</strong><br>arXiv:2302.04761<br>作者：Timo Schick、Jane Dwivedi-Yu、Roberto Dessì、Roberta Raileanu、Maria Lomeli、Luke Zettlemoyer、Nicola Cancedda、Thomas Scialom<br>提交 2023-02-09<br><a href="https://arxiv.org/abs/2302.04761">https://arxiv.org/abs/2302.04761</a></td>
+      <td><strong>已核验 200</strong><br><span style="font-size:12.5px;">41,534 字节<br>已确认摘要与作者可读</span></td>
+      <td>第 6.1 节②（"工具"概念的学术来源）；第 2 节学习目标 4 的背景</td>
+      <td>工具使用（tool use）的学术源头。摘要指出模型可通过简单 API<strong>自学</strong>调用外部工具，学会决定调用哪个 API、何时调用、传什么参数、以及如何将结果并入后续 token 预测。用于说明"工具"在学术语境下指的是<strong>模型调用外部 API 的能力</strong>——与 Skill 的"任务知识包"不属于同一层面。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>本机无法核验的来源（如实标注，未用于论证）</h3>
+<div class="warn">
+<p><strong>docs.claude.com 域下文档页 —— 无法核验。</strong></p>
+<p>实测 <code>https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview</code>：curl 返回 <strong>HTTP 200</strong>，但被 302 重定向至 <code>https://claude.com/app-unavailable-in-region</code>，页面标题为 <strong>"App unavailable in region"</strong>，正文中该提示出现 4 次，<strong>实际读不到任何文档内容</strong>。</p>
+<p>因此：<strong>本文未引用该域下的任何页面</strong>，也<strong>未采信</strong>其中可能存在的字段说明（例如 <code>allowed-tools</code> 等 frontmatter 可选字段——[2] 中仅明确 <code>name</code> 与 <code>description</code> 为必需，未提及该字段）。此处如实记录，不假装核验通过。</p>
+<p>同样地，<strong>github.com 在本机被封锁</strong>（<code>github.com/anthropics/skills</code> 示例仓库无法访问），故本文<strong>不将其列为来源</strong>。</p>
+</div>
+
+<!-- ===================== 9 ===================== -->
+<h2 id="s9">9. 我的疑问</h2>
+
+<ol>
+  <li>
+    <p><strong>"判断相关性"这一步到底是谁在判断、按什么标准判断？</strong></p>
+    <p>[2] 只说模型"认为相关"时就会加载正文，但这个匹配过程是个黑盒。它是拿用户请求和 <code>description</code> 做语义相似度匹配，还是纯粹靠模型的自由判断？如果是后者，那么在技能数量变多时，误触发和漏触发会怎么变化？有没有办法观测和调优——比如"这个技能被触发了几次、其中几次是误触发"这类指标？<strong>我目前能操作的部分（写好 description）是我凭推理得出的最佳实践，而不是从文档里读到的机制。</strong></p>
+  </li>
+  <li>
+    <p><strong>多个技能同时命中时，协调失败的具体表现是什么？</strong></p>
+    <p>官方把可组合性列为特性，说模型会自动协调<sup>[1]</sup>，但我在 6.4 节给出的四条建议全是我自己基于"加载 ≠ 照做"（6.1 第 ⑤ 条）推出来的，<strong>没有任何来源佐证</strong>。真实情况下，两个指令冲突的 Skill 同时被加载，模型是会报错、随机选一个、还是把两边的要求混在一起产出个四不像？我没有找到资料说明这一点。</p>
+  </li>
+  <li>
+    <p><strong>第三层的"按需导航"由谁保证？</strong></p>
+    <p>[2] 说模型"可以选择"去导航发现附属文件。但既然是"选择"，就一定有选错的时候——模型在需要细节时没去读 <code>reference.md</code>，硬凭正文里的印象现编，这种失败我怎么发现？也就是说，<strong>分层解决的问题（省上下文）会不会以另一种形式反弹成新的问题（漏读导致的幻觉）</strong>？这两者之间的平衡点在哪，我没想明白。</p>
+  </li>
+  <li>
+    <p><strong>技能数量和单条 <code>description</code> 长度的取舍，有没有量化的经验值？</strong></p>
+    <p>我在第 4 节论证了"常驻成本随技能数线性增长"，但这里缺一个数量感：装多少个技能、每个 description 多少字，才会对实际任务产生可感知的影响？官方文档只讲了原则没给数字，而这类工程经验值往往才是真正有用的部分。</p>
+  </li>
+</ol>
+
+<footer>
+  <p>本页由 <code>concept-study-generator</code> 技能生成，遵循其"第五节输出结构"的 9 节规范，并已按其"第七节自检要求"逐条复核。</p>
+  <p>交叉引用：<code>learning-materials/agent.html</code>（智能体）、<code>learning-materials/llm-context.html</code>（大模型的上下文窗口）。</p>
+  <p>成稿日期：2026-09-05　｜　所有来源链接均于当日在本机实际访问核验。</p>
+</footer>
+
+</div>
+</body>
+</html>

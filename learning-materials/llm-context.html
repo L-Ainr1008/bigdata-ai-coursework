@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习资料：大模型的上下文（Context / 上下文窗口）</title>
+<style>
+  :root{
+    --ink:#24292f;
+    --ink-soft:#57606a;
+    --line:#d8dee4;
+    --bg:#ffffff;
+    --accent:#1f6feb;
+    --accent-soft:#eaf2ff;
+    --warn:#bc4c00;
+    --warn-soft:#fff5e6;
+    --good:#1a7f37;
+    --good-soft:#eaf6ec;
+    --code-bg:#f4f5f7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:32px 20px 80px;
+    background:#fbfbfc;
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC",sans-serif;
+    line-height:1.7;
+    font-size:16px;
+  }
+  .wrap{max-width:900px;margin:0 auto;}
+  header.hd{
+    border:1px solid var(--line);
+    border-left:5px solid var(--accent);
+    background:var(--bg);
+    padding:24px 28px;
+    border-radius:6px;
+    margin-bottom:28px;
+  }
+  header.hd h1{margin:0 0 6px;font-size:26px;line-height:1.4;}
+  header.hd .sub{color:var(--ink-soft);font-size:14px;}
+  section{
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:22px 28px;
+    margin-bottom:20px;
+  }
+  h2{
+    font-size:20px;
+    margin:0 0 16px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--line);
+  }
+  h2 .num{
+    display:inline-block;
+    background:var(--accent);
+    color:#fff;
+    font-size:14px;
+    width:26px;height:26px;
+    line-height:26px;
+    text-align:center;
+    border-radius:4px;
+    margin-right:10px;
+    vertical-align:2px;
+  }
+  h3{font-size:17px;margin:22px 0 8px;}
+  h4{font-size:15px;margin:16px 0 6px;color:var(--ink-soft);}
+  p{margin:10px 0;}
+  ul,ol{margin:10px 0;padding-left:24px;}
+  li{margin:6px 0;}
+  strong{color:#0b2545;}
+
+  sup a{
+    text-decoration:none;
+    color:var(--accent);
+    font-weight:600;
+    font-size:11px;
+    padding:0 1px;
+  }
+  sup a:hover{text-decoration:underline;}
+
+  table{
+    border-collapse:collapse;
+    width:100%;
+    margin:14px 0;
+    font-size:14.5px;
+  }
+  th,td{
+    border:1px solid var(--line);
+    padding:9px 11px;
+    vertical-align:top;
+    text-align:left;
+  }
+  thead th{background:#f0f3f6;font-weight:600;}
+  tbody tr:nth-child(even){background:#fbfcfd;}
+
+  pre{
+    background:var(--code-bg);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:14px 16px;
+    overflow-x:auto;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:13px;
+    line-height:1.6;
+    margin:12px 0;
+  }
+  code{
+    background:var(--code-bg);
+    border-radius:3px;
+    padding:1px 5px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:13.5px;
+  }
+  pre code{background:none;padding:0;}
+
+  .box{
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:14px 18px;
+    margin:14px 0;
+    background:#fcfcfd;
+  }
+  .box.def{background:var(--accent-soft);border-color:#bcd7fb;}
+  .box.not{background:var(--warn-soft);border-color:#f0d9b5;}
+  .box.mine{background:var(--good-soft);border-color:#bfe3c8;}
+  .box .lbl{
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.5px;
+    color:var(--ink-soft);
+    display:block;
+    margin-bottom:6px;
+  }
+
+  .flow{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:20px;
+    background:#fcfcfd;
+    margin:16px 0;
+  }
+  .flow-title{font-weight:600;font-size:14px;color:var(--ink-soft);margin-bottom:14px;text-align:center;}
+  .srcs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .srcbox{
+    flex:1 1 150px;
+    min-width:130px;
+    border:1px solid #bcd7fb;
+    background:#eaf2ff;
+    border-radius:5px;
+    padding:9px 8px;
+    text-align:center;
+    font-size:13px;
+    line-height:1.45;
+  }
+  .srcbox b{display:block;font-size:13.5px;}
+  .srcbox span{font-size:11.5px;color:var(--ink-soft);}
+  .arw{text-align:center;color:var(--accent);font-size:18px;line-height:1;margin:10px 0;}
+  .node{
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:5px;
+    padding:10px 14px;
+    text-align:center;
+    font-size:14px;
+    max-width:520px;
+    margin:0 auto;
+  }
+  .node.hot{border-color:#f0c36d;background:#fffaf0;}
+  .node.out{border-color:#bfe3c8;background:#eaf6ec;}
+  .bar{
+    display:flex;height:30px;border:1px solid var(--line);border-radius:4px;overflow:hidden;margin:12px 0 8px;
+  }
+  .bar div{display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink-soft);}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px;}
+  .loop{
+    text-align:center;font-size:12.5px;color:var(--ink-soft);
+    border:1px dashed var(--line);border-radius:5px;padding:8px;margin-top:10px;
+  }
+
+  details{
+    border:1px solid var(--line);
+    border-radius:5px;
+    margin:12px 0;
+    background:#fff;
+  }
+  summary{
+    cursor:pointer;
+    padding:11px 16px;
+    font-weight:600;
+    font-size:15px;
+    list-style:none;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary::before{content:"▶ ";color:var(--accent);font-size:12px;}
+  details[open] summary::before{content:"▼ ";}
+  details[open] summary{border-bottom:1px dashed var(--line);}
+  .ans{padding:12px 18px 16px;font-size:14.5px;background:#fcfcfd;border-bottom-left-radius:5px;border-bottom-right-radius:5px;}
+  .ans .tag{
+    display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:3px;margin-right:8px;
+  }
+  .tag.t{background:#fde8e8;color:#a40e0e;}
+  .tag.f{background:#eaf6ec;color:var(--good);}
+
+  .trap{border-left:4px solid #a40e0e;}
+  .trap summary{background:#fffafa;}
+
+  .srcrow td:first-child{white-space:nowrap;font-weight:600;text-align:center;width:44px;}
+  td.ok{color:var(--good);font-weight:600;white-space:nowrap;}
+  a{color:var(--accent);word-break:break-all;}
+
+  .note{font-size:13.5px;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:12px;margin:12px 0;}
+  footer{text-align:center;color:var(--ink-soft);font-size:13px;margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hd">
+  <h1>概念学习资料：大模型的上下文（Context / 上下文窗口）</h1>
+  <div class="sub">
+    课程：《大数据与人工智能》 &nbsp;|&nbsp; 学习者：逢春 &nbsp;|&nbsp; 基础：有 Python 基础，未系统学过 AI 理论<br>
+    资料类型：单文件自包含 HTML &nbsp;|&nbsp; 文中 <sup><a href="#src-1">[1]</a></sup> 等上标对应第 8 节「资料来源」
+  </div>
+</header>
+
+<!-- ======================= 1 ======================= -->
+<section id="s1">
+  <h2><span class="num">1</span>概念速览</h2>
+
+  <div class="box def">
+    <span class="lbl">一句话定义</span>
+    <p style="margin:0"><strong>上下文窗口，是模型在生成下一个 token 时，能够"回头看见"的那段 token 序列的长度上限；它是模型的一次性工作记忆，而不是它的长期知识。</strong></p>
+  </div>
+
+  <div class="box not">
+    <span class="lbl">它不是什么（这三条是后面所有内容的地基）</span>
+    <ul style="margin:6px 0 0">
+      <li><strong>它不是模型的"记忆"。</strong>上下文随会话结束而消失。下次新开一个对话，哪怕同一个模型，它对上次聊过什么一无所知——除非你把上次的内容重新写进这次的输入里。</li>
+      <li><strong>它不是模型的"知识"。</strong>模型的知识来自训练语料，被固化在参数里；上下文里塞进去的资料只是这次"临时借给它看"，看完就走，不会让它真的学会。</li>
+      <li><strong>它不是越大就越好的性能指标。</strong>"装得下"和"用得好"是两件事。窗口再大，模型对窗口内不同位置信息的利用程度也并不均匀，塞满甚至会拖累表现 <sup><a href="#src-2">[2]</a></sup><sup><a href="#src-5">[5]</a></sup>。</li>
+    </ul>
+  </div>
+
+  <div class="box mine">
+    <span class="lbl">一句话个人理解（逢春）</span>
+    <p style="margin:0 0 8px">
+      我把它理解成<strong>一块"每次提问前要重新写满的白板"</strong>：模型是失忆的，它每一次作答都只看眼前这块白板上现在写着什么，所以我必须把答案需要的一切——要求、历史、资料——当场重写一遍。但我一开始想当然地以为"白板上写着就等于模型看见了"，后来发现不对：白板写得太满，字挤在一起，中间那几行它反而容易看漏。
+    </p>
+    <p style="margin:0;font-size:14px;color:var(--ink-soft)">
+      <strong>类比边界（重要）：</strong>白板这个类比只能帮你建立"一次性、无状态、需要重写"的直觉，它至少在三处会误导你：
+      ① 白板上所有字对人眼是等权可见的，但模型对上下文不同位置的注意强度<em>不均匀</em>，开头和结尾通常被利用得更好，中间偏弱 <sup><a href="#src-2">[2]</a></sup>；
+      ② 白板写下后字迹是静态的，而模型读这段内容时会发生 token 之间<em>相互</em>影响的加权计算，内容的"含义"依赖于同窗口里还放着什么 <sup><a href="#src-1">[1]</a></sup>；
+      ③ 白板不花钱，上下文要花钱——每个 token 都要计费，且长度直接影响响应速度 <sup><a href="#src-5">[5]</a></sup>。
+    </p>
+  </div>
+</section>
+
+<!-- ======================= 2 ======================= -->
+<section id="s2">
+  <h2><span class="num">2</span>学习目标</h2>
+  <p>学完这份资料后，我希望自己能够做到以下四件事（也是老师可以直接拿来考我的四条）：</p>
+  <ol>
+    <li><strong>说清计量关系。</strong>用自己的话解释"上下文窗口"和"token"的关系，并能对一段给定的中英文文本做出<em>量级正确</em>的 token 估算（不要求精确，但别差一个数量级）。</li>
+    <li><strong>说清根源机制。</strong>讲明白自注意力如何让上下文里的 token "互相看见"，以及为什么正是这个机制，让上下文<em>既有用、又昂贵</em> <sup><a href="#src-1">[1]</a></sup><sup><a href="#src-5">[5]</a></sup>。</li>
+    <li><strong>能拆能装。</strong>列出上下文的典型组成部分（系统提示、对话历史、检索资料、工具结果），并针对一个具体任务，设计一套"该放什么、不该放什么、放在哪个位置"的组装方案。</li>
+    <li><strong>能诊断失败。</strong>识别"中间信息丢失""上下文膨胀""会话串味"这几类典型故障，并说出至少三种应对手段（压缩、即时检索、子任务隔离等）及其适用场景 <sup><a href="#src-2">[2]</a></sup><sup><a href="#src-3">[3]</a></sup><sup><a href="#src-5">[5]</a></sup>。</li>
+  </ol>
+</section>
+
+<!-- ======================= 3 ======================= -->
+<section id="s3">
+  <h2><span class="num">3</span>核心问题</h2>
+  <p>下面三个问题是我读资料时真正卡住过的地方，整份资料基本就是围绕它们展开的：</p>
+  <ol>
+    <li><strong>既然模型能"看见"整个上下文，为什么把同一条关键证据放在第 3 段和第 30 段，模型的表现会不一样？</strong><br>
+      <span style="color:var(--ink-soft);font-size:14.5px">直觉上"都在窗口里 = 都看得见"，但实验结论并非如此。这个问题直接指向第 4 节的"U 型曲线"。</span> <sup><a href="#src-2">[2]</a></sup></li>
+    <li><strong>上下文窗口从几万涨到几十万，我们解决的是什么问题，又<em>新</em>制造了什么问题？</strong><br>
+      <span style="color:var(--ink-soft);font-size:14.5px">如果只是"不够装"，那扩容就够了。但扩容本身带有代价，而且有些代价不随窗口变大而消失。</span> <sup><a href="#src-5">[5]</a></sup></li>
+    <li><strong>"提示词工程"和"上下文工程"是同一件事换了个说法吗？</strong><br>
+      <span style="color:var(--ink-soft);font-size:14.5px">如果不是，多出来的那部分究竟是什么？这是第 4 节要素五和第 6 节的核心。</span> <sup><a href="#src-5">[5]</a></sup></li>
+  </ol>
+</section>
+
+<!-- ======================= 4 ======================= -->
+<section id="s4">
+  <h2><span class="num">4</span>核心机制</h2>
+  <p>我把这个概念拆成五个组成要素。前三个回答"它是什么、怎么运转"，后两个回答"它为什么会失控"。</p>
+
+  <h3>要素一：Token —— 上下文的计量单位，不是字符</h3>
+  <p>
+    模型不按"字"或"字符"来数输入，而是先把文本切成 <strong>token</strong>（分词单元），再对 token 序列做计算。所以上下文窗口的容量单位一律是 token 数。
+    粗略量级上：英文大约 0.75 个单词对应 1 个 token；中文由于分词器差异极大，<em>大致</em>可以按"1 个汉字接近 1 个 token"来估，但这只是估数量级的土办法，不同模型的分词器结果可以差出不少。
+  </p>
+  <p>对有 Python 基础的人来说，最容易踩的坑是拿 <code>len(text)</code> 当 token 数：</p>
+  <pre><code># 错误直觉：字符数 == token 数
+print(len(open("report.txt", encoding="utf-8").read()))   # 这是字符数，不是 token 数
+
+# 只能用于"量级判断"的粗略估计，不能当真值
+def rough_token_estimate(text: str) -&gt; int:
+    cn   = sum(1 for ch in text if "\u4e00" &lt;= ch &lt;= "\u9fff")   # 汉字
+    rest = len(text) - cn
+    return int(cn * 1.0 + rest * 0.25)                            # 经验系数，非精确值
+
+# 真正准确的做法：用与该模型配套的 tokenizer 去编码
+# tokens = tokenizer.encode(text); print(len(tokens))</code></pre>
+  <p class="note">注意：这个估算函数的意义只在于"别把 3 万字符中文档当成 3 千 token 那样轻松"，而不是给出一个可信数字。任何涉及成本或截断的判断，都应当用目标模型的真实分词器去数。</p>
+
+  <h3>要素二：上下文窗口 —— 一块共享的、有上限的预算</h3>
+  <p>
+    上下文窗口是<strong>输入 token 与输出 token 共享的预算</strong>：你提问时送进去的内容占一部分，模型回答时生成的 token 也要从同一块额度里出。
+    因此"还剩多少窗口"不是固定值，而是随对话推进不断被消耗的流动资产。
+  </p>
+  <p>
+    另一个必须记住的性质是<strong>无状态</strong>：模型本身不会记住上一次调用。所谓"它记得我们前面聊了什么"，是因为客户端把历史消息<em>每次都重新整包发了一遍</em>。
+  </p>
+  <pre><code># 模型的"记忆"其实是我们每一轮都重发一遍上下文造成的错觉
+messages = [
+    {"role": "system", "content": "你是课程助教，只依据下面给出的资料回答，资料里没有的就说明不知道。"},
+    {"role": "user",   "content": "资料：\n" + 检索到的三段 + "\n\n问题：" + 问题},
+]
+
+# 下一轮调用如果不再带上 messages，模型就完全"忘了"上一轮说过什么。
+# 上下文窗口 = 这一整包 messages 编码后的 token 上限。</code></pre>
+
+  <h3>要素三：自注意力 —— 上下文"互相看见"的根源 <sup><a href="#src-1">[1]</a></sup></h3>
+  <p>
+    这是整份资料里最关键的一环。上下文之所以<em>有用</em>，不只是因为信息被放进去了，而是因为 Transformer 的自注意力机制让<strong>每个 token 都能直接与其他所有 token 建立联系</strong>。
+    读到这里时，词与词之间不再只是"按顺序排着"，而是互相消歧、互相补充：代词靠前文确定指代，专有名词靠后文确定含义，一段报错要靠同窗口里的源码才能被读懂。
+  </p>
+  <p>
+    换个说法：<strong>上下文不是一堆并列摆放的纸条，而是一张每个节点都连着其他所有节点的网。</strong>这正是"上下文工程"之所以成立的前提——往窗口里加一段资料，不只是多了一条信息，而是改变了所有其他信息的解读方式。
+  </p>
+  <p>
+    但同一件事也是代价的来源。每个 token 都要和所有 token 配对，n 个 token 就产生 <strong>n² 量级的成对关系</strong>；上下文变长，模型捕捉这些关系的能力被摊薄，于是形成"上下文长度"与"注意力聚焦程度"之间的天然张力 <sup><a href="#src-5">[5]</a></sup>。
+    <br><strong>一句话记住：自注意力既是上下文的力量来源，也是它的成本来源——两者是同一个机制的两面。</strong>
+  </p>
+  <p class="note">需要澄清一点：n² 严格来说是<em>计算复杂度</em>的粗略说法（实际实现中有各种优化手段来降低算力和显存开销）。Anthropic 在文中使用它是为了说明"成对关系随长度急剧膨胀、注意力被摊薄"这一结构性张力，而不是在陈述某个具体的算法实现细节 <sup><a href="#src-5">[5]</a></sup>。</p>
+
+  <h3>要素四：上下文里通常装什么</h3>
+  <p>一次调用里，进入上下文的内容大致可以分成四类（外加输出格式要求）：</p>
+  <table>
+    <thead>
+      <tr><th style="width:150px">组成部分</th><th>它负责什么</th><th>典型风险</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>系统提示</strong><br>（system prompt）</td>
+        <td>设定角色、口吻、边界与"什么情况下该说不知道"。它是对话里最稳定、每次都会带上的那层。</td>
+        <td>写得太长、把所有边界情况都堆进去，反而会稀释真正重要的规则 <sup><a href="#src-5">[5]</a></sup>。</td>
+      </tr>
+      <tr>
+        <td><strong>对话历史</strong></td>
+        <td>让模型知道前面说了什么、你已经否掉了哪些方案。</td>
+        <td>失败的尝试也留在里面，会污染后续判断；无关任务的残留会"串味" <sup><a href="#src-3">[3]</a></sup>。</td>
+      </tr>
+      <tr>
+        <td><strong>检索到的资料</strong><br>（RAG）</td>
+        <td>模型训练时没见过的内容：课程 PDF、内部文档、今天的数据。</td>
+        <td>检索回来一大堆，真正有用的那句埋在中间。</td>
+      </tr>
+      <tr>
+        <td><strong>工具返回结果</strong></td>
+        <td>命令输出、搜索结果、数据库查询结果——相当于模型从环境拿到的"真值" <sup><a href="#src-4">[4]</a></sup>。</td>
+        <td>一次 <code>cat</code> 整个目录、一次无范围的搜索，就能把窗口吃光 <sup><a href="#src-3">[3]</a></sup>。</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="note">注意"工具结果"这一行的性质：在智能体的循环里，工具返回不只是"答案"，更是模型下一步决策的依据。Anthropic 把"每一步从环境（工具调用结果、代码执行）获得真值"视为智能体推进的关键 <sup><a href="#src-4">[4]</a></sup>。而这些结果会持续累积进上下文——这就是长任务失控的起点。</p>
+
+  <h3>要素五：位置不均匀 —— 中间信息丢失 <sup><a href="#src-2">[2]</a></sup></h3>
+  <p>
+    《Lost in the Middle》这篇论文专门测了"相关信息放在上下文的什么位置"对表现的影响，任务是多文档问答和键值检索。结论是：
+    <strong>相关信息出现在开头或结尾时表现最好；当模型必须到长上下文的中间去取信息时，表现显著下降——即使对那些明确以长上下文为卖点的模型也是如此。</strong> <sup><a href="#src-2">[2]</a></sup>
+  </p>
+  <p>把这条结论画成图，就是一条 U 型曲线：</p>
+  <pre><code>模型表现
+  高 │●───╮                                    ╭───●
+     │     ╰──╮                            ╭──╯
+     │         ╰──╮                    ╭──╯
+     │             ╰──╮            ╭──╯
+     │                 ╰──╮    ╭──╯
+     │                     ╰──●──╯
+  低 │
+     └───────────────────────────────────────────────►
+        开头            中间              结尾
+              关键信息在上下文中的相对位置
+
+  ● 开头/结尾：被利用得最好        ● 中间：显著退化
+  （示意图，用于表达趋势；非论文原始数据点，实际曲线形状随任务与模型而异）[2]</code></pre>
+  <p>
+    同时还有一个更一般的现象：随着上下文窗口内 token 数增加，模型从中准确回忆信息的能力会下降（这个现象被称为 <em>context rot</em>，直译"上下文腐烂"）。
+    需要强调，这不是"到某个长度突然崩掉"的断崖，而是<strong>精度逐步下滑的渐变</strong>——模型在长上下文下依然很强，只是检索精确度和长程推理的可靠性不如短上下文时 <sup><a href="#src-5">[5]</a></sup>。
+  </p>
+
+  <h3>流程图：上下文是怎么被组装和消耗的</h3>
+  <div class="flow">
+    <div class="flow-title">图 1 · 上下文组装流水线与注意力交互</div>
+
+    <div class="srcs">
+      <div class="srcbox"><b>系统提示</b><span>角色 / 规则 / 边界</span></div>
+      <div class="srcbox"><b>对话历史</b><span>前文 + 已否掉的方案</span></div>
+      <div class="srcbox"><b>检索资料</b><span>RAG 回来的文档片段</span></div>
+      <div class="srcbox"><b>工具结果</b><span>命令输出 / 查询返回</span></div>
+    </div>
+
+    <div class="arw">▼</div>
+    <div class="node">拼接成一包 messages → 分词器切成 token 序列</div>
+
+    <div class="arw">▼</div>
+    <div class="node hot">
+      <b>上下文窗口（容量上限）</b>
+      <div class="bar">
+        <div style="width:12%;background:#1f6feb">系统</div>
+        <div style="width:20%;background:#5a9bd8">历史</div>
+        <div style="width:26%;background:#f0a202">资料</div>
+        <div style="width:22%;background:#8b5cf6">工具</div>
+        <div style="width:20%;background:#c9d1d9;color:#24292f">剩余额度</div>
+      </div>
+      <div class="legend">
+        <span><i style="background:#1f6feb"></i>系统提示</span>
+        <span><i style="background:#5a9bd8"></i>对话历史</span>
+        <span><i style="background:#f0a202"></i>检索资料</span>
+        <span><i style="background:#8b5cf6"></i>工具结果</span>
+        <span><i style="background:#c9d1d9"></i>剩余额度（还要留给输出）</span>
+      </div>
+    </div>
+
+    <div class="arw">▼</div>
+    <div class="node hot">
+      <b>自注意力：每个 token 与所有 token 建立联系</b><br>
+      <span style="font-size:13px;color:var(--ink-soft)">n 个 token → 约 n² 量级成对关系；长度↑ ⇒ 注意力被摊薄 <sup><a href="#src-1">[1]</a></sup><sup><a href="#src-5">[5]</a></sup><br>
+      且利用不均匀：开头/结尾强，中间弱 <sup><a href="#src-2">[2]</a></sup></span>
+    </div>
+
+    <div class="arw">▼</div>
+    <div class="node out"><b>输出 token（从同一块额度里出）</b></div>
+
+    <div class="loop">
+      ↻ 本轮的用户问题 + 模型回答 + 工具结果，会被追加进"对话历史"，成为下一轮上下文的一部分 —— 循环往复，额度持续消耗
+    </div>
+  </div>
+  <p class="note">这张图里最值得盯的是最后那个回环箭头：上下文不是一次性的输入，而是一条<strong>不断自我累积的河流</strong>。所有上下文工程手段，本质上都是在管理这条河的流量和泥沙含量。</p>
+</section>
+
+<!-- ======================= 5 ======================= -->
+<section id="s5">
+  <h2><span class="num">5</span>应用场景</h2>
+  <p>
+    我选一个自己真的会遇到的场景：用 AI 编程助手调试《大数据与人工智能》课程作业里一个 Python 数据分析项目（约 15 个源文件）。程序抛出了一个我没见过的异常，我需要助手帮我定位。
+  </p>
+
+  <h3>输入 / 处理 / 输出</h3>
+  <table>
+    <thead><tr><th style="width:90px">环节</th><th>具体内容</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>输入</strong></td>
+        <td>
+          <strong>① 系统提示：</strong>"你是 Python 数据分析作业助教。只依据我给出的代码和报错分析；不确定时说明不确定，不要臆造函数名。"<br>
+          <strong>② 对话历史：</strong>前两轮的问答（我已试过重装依赖、无效）。<br>
+          <strong>③ 检索资料：</strong>课程 PDF 里 <code>groupby</code> 那一节的两段说明。<br>
+          <strong>④ 工具结果：</strong>异常 traceback、<code>grep -n "def clean_" -r .</code> 的命中结果、<code>pytest</code> 的输出。<br>
+          <strong>⑤ 当前问题：</strong>"这个 <code>KeyError</code> 到底从哪来的？"
+        </td>
+      </tr>
+      <tr>
+        <td><strong>处理</strong></td>
+        <td>
+          以上五部分拼成一包 messages → 分词为 token → 送入上下文窗口 → 自注意力让 traceback 里的行号、<code>grep</code> 命中的函数定义、PDF 里的 <code>groupby</code> 说明三者<em>相互</em>建立联系（这正是自注意力在起作用 <sup><a href="#src-1">[1]</a></sup>）→ 模型生成回答。
+        </td>
+      </tr>
+      <tr>
+        <td><strong>输出</strong></td>
+        <td>
+          "异常源头在 <code>clean_data.py:47</code>：这段代码先对 DataFrame 做 <code>groupby</code> 再按原列名取值，但分组后该列已变成索引。建议改为 <code>as_index=False</code>。"
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>如果不管理上下文，会怎样</h3>
+  <p>同样是这个任务，假如我图省事，直接让助手"读一下整个项目"：</p>
+  <table>
+    <thead><tr><th style="width:170px">失控方式</th><th>具体后果</th><th style="width:110px">对应机制</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>无范围地灌入</strong></td>
+        <td>助手读取上百个文件，上下文瞬间被填满；后续真正关键的信息反而进不来。</td>
+        <td>窗口是共享预算 <sup><a href="#src-3">[3]</a></sup></td>
+      </tr>
+      <tr>
+        <td><strong>关键信息沉底</strong></td>
+        <td>那条决定性的 traceback 被夹在几十个文件内容的<em>中间</em>，模型对它的利用率下降，开始给出泛泛的猜测。</td>
+        <td>中间信息丢失 <sup><a href="#src-2">[2]</a></sup></td>
+      </tr>
+      <tr>
+        <td><strong>成本与延迟上升</strong></td>
+        <td>每一轮都要重发这几十万 token，钱按 token 计，响应时间也随长度上升。</td>
+        <td>n² 关系 + 逐 token 计费 <sup><a href="#src-5">[5]</a></sup></td>
+      </tr>
+      <tr>
+        <td><strong>失败尝试堆积</strong></td>
+        <td>我反复纠正它，每次失败的方案都留在历史里，后续判断被这些"污染"带偏，越改越乱。</td>
+        <td>上下文污染 <sup><a href="#src-3">[3]</a></sup></td>
+      </tr>
+      <tr>
+        <td><strong>任务之间串味</strong></td>
+        <td>上一个任务（写课程论文提纲）的内容还留在上下文里，它开始把两件事混在一起。</td>
+        <td>无关上下文拖累表现 <sup><a href="#src-3">[3]</a></sup></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>同样是这个任务，管理之后的做法</h3>
+  <ol>
+    <li><strong>按需取，不整包取。</strong>只让它 <code>grep</code> 相关符号、只读报错指向的那两三个文件，而不是 <code>cat</code> 整个项目——保留"路径"这类轻量引用，需要时再展开 <sup><a href="#src-5">[5]</a></sup>。</li>
+    <li><strong>关键证据放两头。</strong>把 traceback 和核心源码放在资料的开头或结尾，把背景性的大段内容放中间。</li>
+    <li><strong>把探索隔离出去。</strong>让子任务在独立的上下文窗口里做大规模搜索，只把浓缩结论（通常一两千 token）交回主对话 <sup><a href="#src-5">[5]</a></sup>。</li>
+    <li><strong>该清就清。</strong>任务切换时清空上下文；同一问题纠正超过两次，说明上下文已被失败方案污染，应当清空后带着更精确的提示重新开始，而不是继续在旧上下文里打补丁 <sup><a href="#src-3">[3]</a></sup>。</li>
+    <li><strong>压缩而非丢弃。</strong>接近上限时做压缩：保留架构决策、未解决的 bug、实现细节，丢掉冗余的工具输出和重复消息 <sup><a href="#src-5">[5]</a></sup>。</li>
+  </ol>
+</section>
+
+<!-- ======================= 6 ======================= -->
+<section id="s6">
+  <h2><span class="num">6</span>易混淆点与边界</h2>
+  <p>五条我一开始搞混、后来才想明白的地方。每条都按"常见误解 / 正确说法 / 为什么会错"拆开写。</p>
+
+  <h3>混淆点 1：上下文窗口 ＝ 模型的记忆</h3>
+  <table>
+    <tbody>
+      <tr><th style="width:110px;background:#fde8e8;color:#a40e0e">常见误解</th><td>"我在这个对话里教过它一次，它以后就知道了。"</td></tr>
+      <tr><th style="background:#eaf6ec;color:#1a7f37">正确说法</th><td>上下文是<strong>一次性工作记忆</strong>，随会话结束消失。模型的持久"知识"只来自训练阶段固化进参数的东西；上下文里的内容是这次借看，不是学会了。</td></tr>
+      <tr><th style="background:#f0f3f6">为什么会错</th><td>因为客户端每轮都把历史消息整包重发，制造出"它记得"的错觉。你以为它在回忆，其实它每次都在重新读一遍你递给它的完整记录。换个新会话，幻觉立刻破灭。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>混淆点 2：窗口够大 ＝ 把资料全塞进去最稳妥</h3>
+  <table>
+    <tbody>
+      <tr><th style="width:110px;background:#fde8e8;color:#a40e0e">常见误解</th><td>"反正有 20 万 token 的窗口，我把 12 个源文件全贴进去，信息越全答案越准。"</td></tr>
+      <tr><th style="background:#eaf6ec;color:#1a7f37">正确说法</th><td><strong>装得下 ≠ 用得好。</strong>窗口变大解决了"放不下"的问题，但没有解决"用不好"的问题：token 越多，模型准确回忆其中信息的能力越弱，且中间位置的信息利用率明显偏低。好的做法是寻找<strong>最小的高信号 token 集合</strong>，而不是最大的全集 <sup><a href="#src-2">[2]</a></sup><sup><a href="#src-5">[5]</a></sup>。</td></tr>
+      <tr><th style="background:#f0f3f6">为什么会错</th><td>我们把"上下文窗口"类比成了硬盘或数据库——以为存进去就能无损随机读取。但它的行为更像人的工作记忆：容量有限，且注意资源会被摊薄。用一个存储系统的直觉去推断一个注意力系统的行为，自然就错了。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>混淆点 3：token 数 ＝ 字符数</h3>
+  <table>
+    <tbody>
+      <tr><th style="width:110px;background:#fde8e8;color:#a40e0e">常见误解</th><td>"这篇文档 8000 个字符，肯定装得下。"（然后被截断、或者费用远超预期）</td></tr>
+      <tr><th style="background:#eaf6ec;color:#1a7f37">正确说法</th><td>容量单位是 token，不是字符，两者不是固定比例。中文和英文的换算比例差别尤其大，不同模型的分词器结果也不同。</td></tr>
+      <tr><th style="background:#f0f3f6">为什么会错</th><td>因为对我们写代码的人来说，<code>len()</code> 返回字符数这个直觉太根深蒂固了。加上"一个词一个 token"的粗略印象，很容易把数量级算错。凡是要判断成本、截断风险，都必须用目标模型的分词器实测。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>混淆点 4：把资料放进上下文 ＝ 模型学会/相信了这份资料</h3>
+  <table>
+    <tbody>
+      <tr><th style="width:110px;background:#fde8e8;color:#a40e0e">常见误解</th><td>"我把课程 PDF 塞进去了，它现在以这份 PDF 为准，不会再用训练时的旧知识了。"</td></tr>
+      <tr><th style="background:#eaf6ec;color:#1a7f37">正确说法</th><td>上下文内容只是<strong>影响这次输出的条件</strong>，不会覆盖训练所得。当上下文资料与模型原有认知冲突时，它未必优先采信上下文。这也是为什么系统提示里要明确写"只依据给定资料回答，没有就说不知道"——靠显式约束，而不是靠"塞进去"这个动作本身。</td></tr>
+      <tr><th style="background:#f0f3f6">为什么会错</th><td>把"提供条件"误当成了"更新参数"。混淆了<strong>推理时的上下文</strong>与<strong>训练时的权重更新</strong>——这是两个完全不同的机制，前者是临时的、逐次调用的，后者才是持久的。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>混淆点 5：压缩上下文 ＝ 无损操作</h3>
+  <table>
+    <tbody>
+      <tr><th style="width:110px;background:#fde8e8;color:#a40e0e">常见误解</th><td>"上下文快满了就让它自动压缩一下，反正信息都还在。"</td></tr>
+      <tr><th style="background:#eaf6ec;color:#1a7f37">正确说法</th><td>压缩是<strong>有损的取舍</strong>。它的标准做法是保留架构决策、未解决的 bug 和实现细节，<em>丢弃</em>冗余的工具输出和重复消息。被丢掉的东西不会回来——所以才有"在压缩指令里明确要求保留哪些内容"这一说 <sup><a href="#src-3">[3]</a></sup><sup><a href="#src-5">[5]</a></sup>。</td></tr>
+      <tr><th style="background:#f0f3f6">为什么会错</th><td>"压缩"这个词是从数据工程借来的，让人联想到无损压缩。但这里的压缩是<strong>摘要</strong>，是模型在判断"什么重要"——判断错了就会永久丢信息。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>边界：什么时候"上下文"这个词根本不是我说的前面那个意思</h3>
+  <p>
+    提醒自己一个命名陷阱：Anthropic 的 <strong>Model Context Protocol（MCP）</strong> 名字里也有 "Context"，但它是用于<strong>工具集成</strong>的协议，和"上下文窗口"不是一个概念 <sup><a href="#src-4">[4]</a></sup>。
+    看文档时遇到 "context" 要先判断它指的是<em>模型这次能看见的 token 集合</em>，还是<em>系统集成层面的某种协议或机制</em>。
+  </p>
+</section>
+
+<!-- ======================= 7 ======================= -->
+<section id="s7">
+  <h2><span class="num">7</span>自测题</h2>
+  <p>共 5 题，其中第 1 题是<strong>陷阱判断题</strong>。建议先写在纸上再对照答案。</p>
+
+  <details class="trap">
+    <summary>第 1 题（判断题 · 陷阱题）："某模型的上下文窗口是 200K token。因此，我把项目的全部 12 个源文件一次性贴进对话，模型就能充分利用每一个文件的每一处细节，这是最稳妥的做法。"</summary>
+    <div class="ans">
+      <p><span class="tag f">错误</span>这句话把"装得下"直接等同于"用得好"了，有两个独立的问题。</p>
+      <ul>
+        <li><strong>问题一（位置）。</strong>即使全部内容都在窗口内，模型对不同位置信息的利用程度也不均匀。实验表明相关信息在<em>开头或结尾</em>时表现最好，在<em>中间</em>时显著退化，连以长上下文为卖点的模型也不例外 <sup><a href="#src-2">[2]</a></sup>。你把 12 个文件平铺进去，就等于把大部分信息放进了"中间"这个低效区。</li>
+        <li><strong>问题二（密度）。</strong>随着上下文 token 数增加，模型准确回忆其中信息的能力会下降；好的做法是找<em>最小的高信号 token 集合</em>，而不是最大的全集 <sup><a href="#src-5">[5]</a></sup>。</li>
+      </ul>
+      <p><strong>更稳妥的做法：</strong>先用 <code>grep</code> 之类的手段定位相关范围，只把命中的片段送进去，并把最关键的那段放在开头或结尾。</p>
+      <p class="note">这题的陷阱在于它说的事实都没错（窗口确实有 200K、确实装得下），错在从"装得下"跳到了"充分利用"。这类"前提都对、结论跳跃"的判断题最容易骗人。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>第 2 题（简答）：请用一句话说清"自注意力"与"上下文窗口"的关系——为什么上下文既能让模型变聪明，又会让模型变贵？</summary>
+    <div class="ans">
+      <p><span class="tag t">参考要点</span>因为它们是<strong>同一个机制的两面</strong>：</p>
+      <ul>
+        <li><strong>让它变聪明：</strong>自注意力让上下文里<em>每个 token 都能与其他所有 token 建立联系</em>，词与词互相消歧、互相补充，所以放进来的资料能被真正"读懂"，而不是孤立地摆着 <sup><a href="#src-1">[1]</a></sup>。</li>
+        <li><strong>让它变贵：</strong>每个 token 都要和所有 token 配对，n 个 token 产生约 n² 量级的成对关系；长度增加时，模型捕捉这些关系的能力被摊薄，注意力聚焦度下降，同时算力和计费成本也在上升 <sup><a href="#src-5">[5]</a></sup>。</li>
+      </ul>
+      <p>答到"互相建立联系"＋"n² 摊薄/成本上升"两点，且明确指出二者同源，就算过关。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>第 3 题（辨析）：我把一份 2026 年的课程讲义放进上下文，让模型据此答题。请问：模型现在"学会"这份讲义了吗？如果讲义内容和它训练时的旧说法冲突，它会一定采信讲义吗？</summary>
+    <div class="ans">
+      <p><span class="tag t">参考答案</span>两个问题都是否定的。</p>
+      <ul>
+        <li><strong>没有"学会"。</strong>上下文内容只是本次推理的条件，会话结束即消失。真正的"学会"要发生在训练阶段、固化进模型参数，与把文本放进上下文是完全不同的机制。</li>
+        <li><strong>不保证采信。</strong>当上下文资料与模型原有认知冲突时，模型未必优先采信上下文。要让它以给定资料为准，必须在系统提示里<em>显式约束</em>（例如"只依据给定资料回答，资料中没有的就说明不知道"），而不能指望"塞进去"这个动作自动生效。</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>第 4 题（估算）：一篇约 6000 个汉字的中文实验报告，按文中给出的粗略量级，它大概占多少 token？你打算怎么验证这个估算靠不靠谱？</summary>
+    <div class="ans">
+      <p><span class="tag t">参考答案</span></p>
+      <ul>
+        <li><strong>估算：</strong>按"1 个汉字接近 1 个 token"的粗口径，约 <strong>6000 token 上下</strong>。如果这个数量级对你很重要（比如要判断是否会超窗口、要算成本），这个精度是不够的。</li>
+        <li><strong>怎么验证：</strong>用<em>目标模型配套的分词器</em>实际编码一遍，取 <code>len(tokens)</code>。中文的分词器差异很大，跨模型套用估算值会失真。</li>
+        <li><strong>另一个容易漏的点：</strong>别忘了<strong>输出也要占同一块额度</strong>。输入 6000 token 不代表还剩"窗口容量 − 6000"全部可用，模型的回答还要从里面出。</li>
+      </ul>
+      <p class="note">本题的评分点不在数字本身（估算偏差是被允许的），而在于你是否知道"字符数 ≠ token 数"，以及是否知道必须用真实分词器验证。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>第 5 题（设计）：你在用 AI 助手改一个课程项目。改到第四轮时，它开始在同一个地方反复出错，你已经纠正了三次。请说出至少两种应对手段，并说明各自适合什么情况。</summary>
+    <div class="ans">
+      <p><span class="tag t">参考要点</span>任选以下三种中的两种即可，关键是说清<em>适用场景</em>：</p>
+      <ul>
+        <li><strong>清空重来。</strong>同一问题纠正超过两次，说明上下文已被失败的尝试污染；此时应当清空上下文，带着一个吸收了前几轮教训的、更精确的提示重新开始。一个干净的新会话配一个好提示，通常胜过一段堆满纠正记录的长会话 <sup><a href="#src-3">[3]</a></sup>。<br><em>适合：</em>方向性错误、早期就跑偏的会话。</li>
+        <li><strong>压缩（compaction）。</strong>把接近上限的对话做摘要，保留架构决策、未解决的 bug 和实现细节，丢掉冗余的工具输出和重复消息，然后用摘要开启新上下文 <sup><a href="#src-5">[5]</a></sup>。<br><em>适合：</em>需要保留大量来回讨论的连续任务；压缩时可以显式指定"必须保留什么"。</li>
+        <li><strong>子任务隔离。</strong>把大规模探索放进独立的上下文窗口，只让浓缩后的结论回到主对话 <sup><a href="#src-5">[5]</a></sup>。<br><em>适合：</em>需要读大量文件、但主任务只需要结论的调研型工作。</li>
+      </ul>
+      <p>加分点：提到"任务切换时清空上下文，避免无关内容串味" <sup><a href="#src-3">[3]</a></sup>。</p>
+    </div>
+  </details>
+</section>
+
+<!-- ======================= 8 ======================= -->
+<section id="s8">
+  <h2><span class="num">8</span>资料来源</h2>
+  <p>
+    以下来源均由我<strong>亲自用 <code>curl -L</code> 实测访问核验</strong>（核验日期：2026-09-05）。核验列记录的是实测结果，标题与作者均取自页面本身的元数据，未做任何推测或补全。
+  </p>
+
+  <table class="srcrow">
+    <thead>
+      <tr>
+        <th style="width:44px">编号</th>
+        <th>标题 / 作者或机构 / 链接</th>
+        <th style="width:112px">核验状态</th>
+        <th style="width:230px">支撑本文哪部分</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="src-1">
+        <td>[1]</td>
+        <td>
+          <strong>Attention Is All You Need</strong><br>
+          Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin<br>
+          <a href="https://arxiv.org/abs/1706.03762">https://arxiv.org/abs/1706.03762</a>
+        </td>
+        <td class="ok">已核验 200</td>
+        <td>第 4 节要素三「自注意力让上下文互相看见」；第 5 节"处理"环节中三类信息相互建立联系的说法；第 6 节混淆点 2；第 7 题第 2 题。</td>
+      </tr>
+      <tr id="src-2">
+        <td>[2]</td>
+        <td>
+          <strong>Lost in the Middle: How Language Models Use Long Contexts</strong><br>
+          Nelson F. Liu, Kevin Lin, John Hewitt, Ashwin Paranjape, Michele Bevilacqua, Fabio Petroni, Percy Liang<br>
+          <a href="https://arxiv.org/abs/2307.03172">https://arxiv.org/abs/2307.03172</a>
+        </td>
+        <td class="ok">已核验 200</td>
+        <td>第 1 节"它不是越大越好"；第 3 节核心问题 1；第 4 节要素五（U 型曲线、中间信息丢失）；第 5 节"关键信息沉底"；第 6 节混淆点 2；第 7 节第 1 题陷阱题。</td>
+      </tr>
+      <tr id="src-3">
+        <td>[3]</td>
+        <td>
+          <strong>Best practices for Claude Code</strong>（Anthropic 工程博客）<br>
+          <a href="https://www.anthropic.com/engineering/claude-code-best-practices">https://www.anthropic.com/engineering/claude-code-best-practices</a><br>
+          <span style="font-size:13px;color:var(--ink-soft)">实测 301 跳转至 <a href="https://code.claude.com/docs/en/best-practices">https://code.claude.com/docs/en/best-practices</a>，终态 200，页面标题 "Best practices for Claude Code - Claude Code Docs"</span>
+        </td>
+        <td class="ok">已核验 200<br>（含跳转）</td>
+        <td>第 4 节要素四"工具结果"的风险；第 5 节"无范围地灌入""失败尝试堆积""任务之间串味"三种失控方式及对应做法；第 6 节混淆点 5；第 7 节第 5 题。</td>
+      </tr>
+      <tr id="src-4">
+        <td>[4]</td>
+        <td>
+          <strong>Building Effective AI Agents</strong>（Anthropic 工程博客）<br>
+          <a href="https://www.anthropic.com/engineering/building-effective-agents">https://www.anthropic.com/engineering/building-effective-agents</a>
+        </td>
+        <td class="ok">已核验 200</td>
+        <td>第 4 节要素四"工具返回结果"这一类的定位（智能体在循环中从环境获取真值、工具结果是下一步决策依据）；第 6 节末尾"边界"中关于 MCP 命名陷阱的辨析。</td>
+      </tr>
+      <tr id="src-5">
+        <td>[5]</td>
+        <td>
+          <strong>Effective context engineering for AI agents</strong>（Anthropic 工程博客）<br>
+          <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents</a>
+        </td>
+        <td class="ok">已核验 200</td>
+        <td>第 1 节"它不是越大越好"；第 3 节核心问题 2、3；第 4 节要素三（n² 关系 / 注意力预算）、要素五（context rot、渐进退化）；第 5 节全部五种应对手段（即时检索、压缩、子任务隔离等）；第 6 节混淆点 2、混淆点 5；第 7 节第 1、2、5 题。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>关于核验的两点诚实说明</h3>
+  <ul>
+    <li>
+      <strong>被我主动放弃的一条链接。</strong>我曾尝试把 <code>https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching</code> 作为第 6 条来源。它的 HTTP 状态码<em>确实返回 200</em>，但跟随跳转后最终落到 <code>https://claude.com/app-unavailable-in-region</code>，页面标题为 "App unavailable in region"，即<strong>因地区限制无法访问正文</strong>。
+      既然读不到内容，就无法确认我引用的说法是否准确，因此<strong>不予采用</strong>。这条记录也提醒我：状态码 200 不等于内容可核验，必须看跳转后的最终页面。
+    </li>
+    <li>
+      <strong>关于 Wikipedia 与 github.com。</strong>这两站在本机网络下无法访问，无法完成核验，因此本文没有把它们列为来源；文中所有论断都只依赖上表 5 条可核验来源，以及我在第 4 节要素一标注为"经验值/示意"的常识性量级判断。
+    </li>
+  </ul>
+</section>
+
+<!-- ======================= 9 ======================= -->
+<section id="s9">
+  <h2><span class="num">9</span>我的疑问</h2>
+  <p>写完这份资料后，以下三个问题我仍然没有搞懂，希望能在课堂上问老师或继续查：</p>
+  <ol>
+    <li>
+      <strong>"中间信息丢失"的<em>机理</em>到底是什么？</strong>
+      《Lost in the Middle》令人信服地报告了<em>现象</em>（开头/结尾好、中间差），但我没能在论文里读到一个确定的因果解释：这究竟源于位置编码的特性、注意力权重在长序列上被稀释、还是训练数据中"关键信息恰好在中间"的样本本来就少？
+      如果机理未定，那我把关键内容"挪到开头"这个做法，就只是对现象的经验性规避，而不是对症下药——下次模型架构一变，这个技巧还灵不灵？ <sup><a href="#src-2">[2]</a></sup>
+    </li>
+    <li>
+      <strong>"n² 成对关系"和"注意力预算被耗尽"，是同一件事吗？</strong>
+      Anthropic 的文章用 n² 来解释注意力为何被摊薄 <sup><a href="#src-5">[5]</a></sup>，但我有点困惑：n² 描述的是<em>计算规模</em>，而"注意力被摊薄"描述的是<em>模型行为</em>。
+      现在有各种工程手段（如更高效的注意力实现）显著降低了长序列的算力和显存开销——那么，它们究竟有没有同时改善"模型对长上下文的利用质量"，还是仅仅让长上下文<em>跑得更快、但照样看漏中间</em>？如果是后者，那"算力成本"和"质量衰减"这两件事就应该被分开讨论，而我在第 4 节把它们写在了一起。
+    </li>
+    <li>
+      <strong>各家公布的"上下文窗口"数字，口径一致吗？</strong>
+      厂商宣传的"200K 上下文"到底指什么：是输入上限，还是输入输出之和？它统计的是模型的原生分词结果，还是某个换算后的"约等于 X 页文档"？
+      如果口径不统一，那么"模型 A 的窗口比模型 B 大一倍"这类比较本身可能就没有意义。我在第 4 节要素二写"输入输出共享预算"，但我不确定这对所有厂商都成立。
+    </li>
+  </ol>
+  <p class="note">第 2 条和第 3 条其实指向同一个担忧：我在学习过程中可能把"厂商文章里的解释性说法"当成了"有定论的技术事实"。这也是我写第 8 节那两条说明的原因。</p>
+</section>
+
+<footer>
+  逢春 · 《大数据与人工智能》课程概念学习资料 · 全部来源已于 2026-09-05 实测核验<br>
+  单文件自包含 HTML，无外部依赖
+</footer>
+
+</div>
+</body>
+</html>

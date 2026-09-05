@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习资料：Agent（智能体）｜《大数据与人工智能》</title>
+<style>
+  :root{
+    --ink:#25292e;
+    --ink-soft:#5a636e;
+    --line:#d8dee6;
+    --bg:#f6f7f9;
+    --card:#ffffff;
+    --accent:#1f6feb;
+    --accent-soft:#eaf2ff;
+    --warn:#fdf3e7;
+    --warn-line:#e0a860;
+    --ok:#eef7f0;
+    --ok-line:#7fb490;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:32px 16px 80px;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px;
+    line-height:1.7;
+  }
+  .wrap{max-width:900px;margin:0 auto;}
+  header{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:28px 32px;
+    margin-bottom:24px;
+  }
+  header h1{margin:0 0 8px;font-size:26px;line-height:1.4;}
+  header .meta{color:var(--ink-soft);font-size:14px;}
+  section{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:24px 32px 28px;
+    margin-bottom:20px;
+  }
+  h2{
+    font-size:20px;
+    margin:0 0 4px;
+    padding-bottom:10px;
+    border-bottom:2px solid var(--accent);
+    display:table;
+  }
+  h2 .num{
+    display:inline-block;
+    background:var(--accent);
+    color:#fff;
+    font-size:14px;
+    border-radius:5px;
+    padding:1px 8px;
+    margin-right:10px;
+    vertical-align:2px;
+  }
+  h3{font-size:16px;margin:26px 0 8px;color:var(--ink);}
+  h3:first-of-type{margin-top:20px;}
+  p{margin:10px 0;}
+  ul,ol{margin:10px 0;padding-left:22px;}
+  li{margin:6px 0;}
+  code{
+    background:#eff1f4;
+    border-radius:4px;
+    padding:1px 5px;
+    font-family:"SFMono-Regular",Consolas,"Courier New",monospace;
+    font-size:14px;
+  }
+  pre{
+    background:#f2f4f7;
+    border:1px solid var(--line);
+    border-left:4px solid var(--accent);
+    border-radius:6px;
+    padding:14px 16px;
+    overflow-x:auto;
+    line-height:1.55;
+    font-size:13.5px;
+  }
+  pre code{background:none;padding:0;font-size:13.5px;}
+  table{
+    border-collapse:collapse;
+    width:100%;
+    margin:14px 0;
+    font-size:15px;
+  }
+  th,td{
+    border:1px solid var(--line);
+    padding:10px 12px;
+    text-align:left;
+    vertical-align:top;
+  }
+  thead th{background:var(--accent-soft);}
+  tbody tr:nth-child(even){background:#fafbfc;}
+  sup a{
+    color:var(--accent);
+    text-decoration:none;
+    font-weight:600;
+    padding:0 1px;
+  }
+  sup a:hover{text-decoration:underline;}
+  .box{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px 18px;
+    margin:14px 0;
+    background:#fbfcfd;
+  }
+  .box.self{background:var(--ok);border-color:var(--ok-line);}
+  .box.not{background:#fdf4f4;border-color:#e0a0a0;}
+  .box .label{
+    font-weight:700;
+    display:block;
+    margin-bottom:4px;
+    font-size:14.5px;
+  }
+  /* ---------- 流程图（纯 HTML/CSS，不依赖任何外部资源） ---------- */
+  .flow{
+    display:flex;
+    align-items:stretch;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:18px 0 8px;
+    padding:18px 14px;
+    background:#fbfcfd;
+    border:1px solid var(--line);
+    border-radius:8px;
+  }
+  .node{
+    flex:1 1 130px;
+    min-width:130px;
+    background:#fff;
+    border:1px solid var(--accent);
+    border-radius:8px;
+    padding:10px 8px;
+    text-align:center;
+    font-size:13.5px;
+    line-height:1.45;
+  }
+  .node b{display:block;font-size:14px;margin-bottom:2px;color:var(--accent);}
+  .node.alt{border-color:var(--ok-line);}
+  .node.alt b{color:#3f7d5c;}
+  .arrow{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    font-size:20px;
+    color:var(--ink-soft);
+    padding:0 2px;
+  }
+  .loop-back{
+    margin:0 0 14px;
+    padding:10px 16px;
+    background:var(--ok);
+    border:1px dashed var(--ok-line);
+    border-radius:8px;
+    font-size:14px;
+    text-align:center;
+  }
+  .analogy{
+    background:#fdf9ec;
+    border:1px solid #e5cf95;
+    border-radius:8px;
+    padding:12px 18px;
+    margin:14px 0;
+  }
+  .analogy .label{font-weight:700;font-size:14.5px;display:block;margin-bottom:4px;}
+  details{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 16px;
+    margin:10px 0;
+    background:#fbfcfd;
+  }
+  summary{
+    cursor:pointer;
+    font-weight:600;
+    color:var(--accent);
+    outline:none;
+  }
+  details[open] summary{margin-bottom:8px;}
+  details .ans{
+    border-top:1px dashed var(--line);
+    padding-top:10px;
+    font-size:15px;
+  }
+  .qtitle{font-weight:600;margin:18px 0 2px;}
+  .tag{
+    display:inline-block;
+    font-size:12.5px;
+    background:#eef1f5;
+    color:var(--ink-soft);
+    border-radius:4px;
+    padding:1px 7px;
+    margin-left:6px;
+    vertical-align:2px;
+  }
+  .tag.trap{background:#fdecec;color:#b03a3a;}
+  .status-ok{
+    color:#2e7d4f;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  footer{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13.5px;
+    padding:10px 0 0;
+  }
+  a{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Agent（智能体）：从"会回答问题"到"会自己把事办完"</h1>
+  <div class="meta">
+    课程：《大数据与人工智能》　｜　学习者：逢春　｜　资料类型：概念学习单（自学 + 作业提交）<br>
+    阅读前基础：会写 Python、没系统学过 AI 理论　｜　预计阅读用时：20~30 分钟
+  </div>
+</header>
+
+<!-- ============ 1 ============ -->
+<section id="s1">
+  <h2><span class="num">1</span>概念速览</h2>
+
+  <div class="box">
+    <span class="label">一句话定义</span>
+    Agent 是一个<b>以大模型做决策核心</b>、能围绕一个目标自己规划步骤、调用外部工具、并把工具返回的结果当作新信息继续往下推进，直到任务完成或触发停止条件的系统。<sup><a href="#src-1">[1]</a></sup>
+  </div>
+
+  <div class="box not">
+    <span class="label">它不是什么（这几条同样重要）</span>
+    <ul>
+      <li><b>不是"更聪明的聊天机器人"。</b>聊天机器人一轮问答就结束；Agent 的价值在于<b>多轮自我推进</b>——上一轮的结果会改变下一轮的动作。</li>
+      <li><b>不是"某款具体产品"。</b>Agent 是一种系统组织方式，不是一个软件名字，也不是某个框架专属。</li>
+      <li><b>不等于"自动化工作流"。</b>固定流程（先 A 再 B 再 C）是<b>人把路径写死</b>；Agent 是<b>模型在运行时临场决定路径</b>。<sup><a href="#src-1">[1]</a></sup></li>
+      <li><b>不等于"有自主意识"。</b>它没有任何意愿、目标感或自我认知，"目标"完全来自人类的指令和系统设计。</li>
+      <li><b>不是"效果一定更好的方案"。</b>能用固定流程稳定解决的事，套上 Agent 往往只是增加了不确定性和成本。<sup><a href="#src-1">[1]</a></sup></li>
+    </ul>
+  </div>
+
+  <div class="box self">
+    <span class="label">一句话个人理解（我自己的话）</span>
+    对我来说，Agent 就是把"大模型"从一个<b>只会动嘴的顾问</b>，改装成一个<b>手上长出了工具的实习生</b>：顾问只告诉你"你可以先查资料再整理"，实习生则会真的去查、查完发现不对再换关键词、凑齐了才把表格交给你——<b>差别不在脑子的聪明程度，而在有没有"动手 — 看结果 — 改主意"这个闭环。</b>
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="s2">
+  <h2><span class="num">2</span>学习目标</h2>
+  <p>读完这份资料，我应该能够做到这四件事：</p>
+  <ol>
+    <li><b>说清楚 Agent 和普通 LLM 问答的分界线</b>，并且能用自己的话解释"多步闭环"到底多了哪一步。</li>
+    <li><b>画出 Agent 的基本结构</b>，说出它的 5 个组成要素分别负责什么，指出其中哪一个是真正干活的（提示：不是模型）。</li>
+    <li><b>判断一个需求该不该用 Agent</b>，能举出"用固定流程更好"的反例，而不是凡是任务就上 Agent。<sup><a href="#src-1">[1]</a></sup></li>
+    <li><b>写出一个最小 Agent 循环的代码骨架</b>（Python），说清楚每一步为什么这么写，尤其是"护栏"那几行。</li>
+  </ol>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="s3">
+  <h2><span class="num">3</span>核心问题</h2>
+  <p>下面三个问题驱动整份资料，读完应该都能回答：</p>
+  <ol>
+    <li><b>"模型调用工具"这件事，到底是模型在调用，还是我们的程序在调用？</b>如果不是模型亲自执行，那"会用工具"这个说法还剩多少含金量？（见第 4、6 节）<sup><a href="#src-3">[3]</a></sup></li>
+    <li><b>既然 Agent 能自己规划，为什么工程实践中反而强调"能不用就别用"？</b>自由度的代价是什么？（见第 6 节）<sup><a href="#src-1">[1]</a></sup></li>
+    <li><b>一个 Agent 跑到第 50 步还没停，是谁的锅？</b>系统会用什么机制防止它无限循环或捅娄子？（见第 4 节要素 5）</li>
+  </ol>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="s4">
+  <h2><span class="num">4</span>核心机制</h2>
+  <p>Agent 不是某个神秘模块，而是<b>五个部分拼起来的一个循环</b>。我按"谁负责什么"拆开记：</p>
+
+  <h3>要素 1：大脑 —— LLM 决策器</h3>
+  <p>它唯一的工作是：<b>看着当前的所有信息，判断"下一步做什么"</b>。输出通常不是一个答案，而是一个决定——要么继续调工具，要么给出最终答复。注意它<b>不直接干活</b>，就像指挥官不下场挖战壕。</p>
+
+  <h3>要素 2：工具箱 —— Tools</h3>
+  <p>工具就是一些普通函数或 API：搜索、读文件、查数据库、发请求、执行代码……模型负责"决定调哪个、传什么参数"，<b>真正执行的是我们自己写的程序</b>。这一点是整个概念里最容易理解错的地方（详见第 6 节）。研究工作中，让模型学会产生可被机器执行的调用动作，正是 ReAct 与 Toolformer 这两篇论文关注的核心。<sup><a href="#src-2">[2]</a></sup><sup><a href="#src-3">[3]</a></sup></p>
+
+  <h3>要素 3：记忆与状态</h3>
+  <ul>
+    <li><b>短期记忆（工作记忆）</b>：这一轮任务里已经发生的"思考—动作—结果"序列，也就是轨迹（trajectory）。没有它，模型每一步都像失忆，会反复做同一件事。</li>
+    <li><b>长期记忆</b>：跨任务要留存的东西，比如用户偏好、历史结论、知识库检索结果。</li>
+  </ul>
+  <p>把外部系统（文件、数据库、知识库）接进来的这层"接线标准"，业界正在形成开放协议，例如 Model Context Protocol（MCP）——它规定的是<b>怎么接</b>，不是 Agent 本身。<sup><a href="#src-5">[5]</a></sup></p>
+
+  <h3>要素 4：循环 —— 思考 → 动作 → 观察</h3>
+  <p>这是 Agent 的心跳。ReAct 这篇论文把"推理"和"行动"显式地交替起来：先想一步（Thought），再做一个动作（Action），然后接收环境反馈（Observation），再想一步……<sup><a href="#src-2">[2]</a></sup> 拆开看每一步都很笨，但串起来就产生了"遇到障碍会改道"的能力。</p>
+
+  <h3>要素 5：停止条件与护栏</h3>
+  <p>没有护栏的 Agent 是一个可能永远跑下去的循环。必须显式设计：最大步数上限、预算/时间上限、失败重试上限，以及<b>高危动作（删除、付款、发消息）必须先过人工确认</b>。<sup><a href="#src-4">[4]</a></sup></p>
+
+  <h3>流程图</h3>
+  <div class="flow">
+    <div class="node"><b>① 目标</b>用户给出任务与可用工具清单</div>
+    <div class="arrow">→</div>
+    <div class="node"><b>② 大脑 LLM</b>思考：当前缺什么？下一步做什么？</div>
+    <div class="arrow">→</div>
+    <div class="node"><b>③ 动作</b>输出"调哪个工具 + 传什么参数"</div>
+    <div class="arrow">→</div>
+    <div class="node"><b>④ 执行</b>我们的代码真正调用工具</div>
+    <div class="arrow">→</div>
+    <div class="node alt"><b>⑤ 观察</b>把结果作为新信息追加进上下文</div>
+  </div>
+  <div class="loop-back">
+    ⟲　观察结果<b>回流</b>到 ②，进入下一轮；直到大脑判断"目标已达成"，或触发<b>步数 / 预算 / 人工叫停</b>等护栏 → 输出最终结果
+  </div>
+
+  <pre><code>        ┌──────────────────────────────────────────────┐
+        │                                              │
+        ▼                                              │
+   [用户目标] → [大脑: Thought] → [Action: 调工具] → [执行] → [Observation]
+                      │                                        │
+                      │ 判断"信息够了"                          └──── 回流 ──┘
+                      ▼
+                 [最终答案]  ←──── 护栏触发时在此强制中断</code></pre>
+
+  <h3>最小代码骨架（Python 伪代码，我按上面的要素自己写的）</h3>
+  <pre><code>tools = {
+    "search_paper": search_paper,   # 输入关键词，返回论文列表
+    "read_pdf":     read_pdf,       # 输入路径，返回正文文本
+}
+
+messages = [
+    {"role": "system", "content": "你是一个研究助理，信息不足时必须先查再答。"},
+    {"role": "user",   "content": "整理这 10 篇论文的核心结论"},
+]
+
+for step in range(MAX_STEPS):                 # 护栏 1：步数上限，防止无限循环
+    reply = llm(messages, tools=tools)        # 要素 1：大脑只决定"下一步做什么"
+
+    if reply.type == "final_answer":          # 要素 5：模型自己判断可以收工
+        print(reply.content)
+        break
+
+    if reply.tool_name in DANGEROUS:          # 要素 5：高危动作必须人工批准
+        raise PermissionError("高危操作需要人工确认：" + reply.tool_name)
+
+    # 要素 2：真正执行工具的是我们的代码，不是模型
+    result = tools[reply.tool_name](**reply.args)
+
+    # 要素 3+4：把 Observation 追加回上下文，形成下一轮的输入
+    messages.append({"role": "tool", "content": result})
+else:
+    # for-else：循环没被 break 打断，说明跑满了步数还没完成
+    print("已超过最大步数，任务未完成，请人工介入")</code></pre>
+  <p>这段代码里最值得记的一行是 <code>result = tools[...](**reply.args)</code>：<b>模型只产出了一个"想调用什么"的文本结构，动手的是我们自己的 Python 函数。</b></p>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="s5">
+  <h2><span class="num">5</span>应用场景</h2>
+  <p>不讲虚的"智能客服"，挑一个我自己真会遇到的场景：</p>
+
+  <h3>场景：把 10 篇英文课程论文的核心结论整理成一张中文对比表</h3>
+  <table>
+    <thead>
+      <tr><th style="width:110px;">环节</th><th>具体内容</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>输入</b></td>
+        <td>一句自然语言目标："把 downloads 目录里这 10 篇 PDF 的方法、数据集、主要结论整理成一张中文表格，缺的信息标注'未提及'。"加上工具清单：<code>list_files</code>、<code>read_pdf</code>、<code>translate</code>、<code>write_table</code>。</td>
+      </tr>
+      <tr>
+        <td><b>处理</b></td>
+        <td>
+          ① 列目录，发现只有 9 个 PDF → 不是硬着头皮做，而是先报告"少一篇"；<br>
+          ② 逐篇读取，第 3 篇是扫描件读不出文字 → 换策略，标记"需人工处理"后跳过，继续下一篇；<br>
+          ③ 读到第 7 篇发现它和第 2 篇是同一方法的不同版本 → 主动比较差异而不是各写一行；<br>
+          ④ 发现某篇论文没写数据集规模 → 回去重读实验章节，仍找不到就填"未提及"（而不是编一个）；<br>
+          ⑤ 凑齐后调用 <code>write_table</code> 输出，并附上"3 处需要你复核"的清单。
+        </td>
+      </tr>
+      <tr>
+        <td><b>输出</b></td>
+        <td>一张 10 行的中文对比表（含"未提及"标记）+ 一份不确定项清单 + 一句"第 3 篇是扫描件，需要你手动补"。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="box not">
+    <span class="label">如果不用 Agent，会怎样？</span>
+    <ul>
+      <li><b>纯聊天机器人</b>：它根本没读过我的 PDF，要么让我自己把全文贴进去（贴到第 3 篇就超上下文了），要么凭领域印象编一份"看起来很对"的表——<b>这是最危险的结果，因为它编得很像真的</b>。</li>
+      <li><b>写死的脚本</b>：我能写一个"遍历 PDF → 抽取 → 翻译 → 输出"的脚本，但它遇到扫描件会直接抛异常，遇到缺字段会填 <code>None</code>，遇到第 10 个文件不存在会崩。<b>每个意外都要我提前想到并写 if-else</b>，而 Agent 是遇到意外时临场绕路。</li>
+      <li><b>结论</b>：这类任务的特点是<b>步骤数不确定、异常情况多、需要边看边改主意</b>——正好落在 Agent 的舒适区。</li>
+    </ul>
+  </div>
+
+  <div class="box">
+    <span class="label">反过来说，什么时候不该用？</span>
+    如果只是"把 10 个 PDF 的文件名改成统一格式"，写个 for 循环 20 行搞定、跑一万次结果都一样。套上 Agent 等于花 10 倍成本去换一个"可能改错文件名"的风险。<sup><a href="#src-1">[1]</a></sup>
+  </div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="s6">
+  <h2><span class="num">6</span>易混淆点与边界</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:26%;">常见误解</th>
+        <th style="width:32%;">正确说法</th>
+        <th style="width:42%;">为什么会错（把人带沟里的原因）</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>① "Agent 就是更聪明的 ChatGPT。"</b></td>
+        <td>两者的脑子可能是同一个模型，区别在于<b>有没有闭环</b>：Agent 会把动作的结果拿回来继续决策，而一次性问答不会。<sup><a href="#src-1">[1]</a></sup></td>
+        <td>因为它们对话时"长得一样"，都是从输入框到文字输出，外观上看不出差别。但系统的<b>控制流</b>完全不同：一个是单箭头，一个是带回路的环。</td>
+      </tr>
+      <tr>
+        <td><b>② "模型调用了搜索工具，所以它能上网。"</b></td>
+        <td>模型只是生成了一段<b>符合格式的文本</b>（"我要调 search，参数是 xxx"），真正发请求的是我们的程序；模型从头到尾没接触过网络，它看到的是我们把结果<b>抄回</b>给它的文字。<sup><a href="#src-2">[2]</a></sup><sup><a href="#src-3">[3]</a></sup></td>
+        <td>因为在代码层面我们会写 <code>llm(messages, tools=tools)</code>，看起来像把工具"递给"了模型。这个 API 写法掩盖了中间那步"程序代执行"。</td>
+      </tr>
+      <tr>
+        <td><b>③ "自由度越高越好，什么都该让 Agent 自己规划。"</b></td>
+        <td>工程实践里明确的建议是<b>从最简单的方案开始</b>，能确定性地解决就别加自主性；每多一分自由度，就多一分不可复现、难调试和出错放大的风险。<sup><a href="#src-1">[1]</a></sup><sup><a href="#src-4">[4]</a></sup></td>
+        <td>因为演示视频里 Agent 自主解决问题特别酷，容易给人"越自主越强"的印象。但课程作业和真实生产要的是<b>稳定复现</b>，不是偶尔惊艳。</td>
+      </tr>
+      <tr>
+        <td><b>④ "Agent 会自己停下来，因为它是智能的。"</b></td>
+        <td>停止条件必须<b>由系统设计者显式写出来</b>：步数上限、预算上限、超时、人工确认关卡。模型自己判断"该收工了"只是其中一条路径，不能只依赖它。<sup><a href="#src-4">[4]</a></sup></td>
+        <td>因为大多数时候它确实停了，让人以为这是模型的"常识"。实际上一旦某步出错、观察结果始终"不够"，它就会一直在环里绕圈烧钱。</td>
+      </tr>
+      <tr>
+        <td><b>⑤ "MCP 是一个 Agent 开发框架。"</b></td>
+        <td>MCP 是<b>协议层</b>，规定 Agent / 应用怎么以统一方式连接外部数据源和工具；它不负责规划、不负责推理，跟"Agent 框架"不是一个层次的东西。<sup><a href="#src-5">[5]</a></sup></td>
+        <td>因为它几乎总是和 Agent 讨论一起出现，还经常被说成"给 Agent 接工具用的"，听着就像框架。类比：它是<b>USB 接口标准</b>，不是电脑本身。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="analogy">
+    <span class="label">类比：Agent ≈ 带工具箱的实习生</span>
+    大脑 = 实习生的判断力；工具 = 他手上的搜索引擎、Excel、命令行；记忆 = 他做过的记录本；循环 = 他"查一下、对一下、改一下"的工作节奏；护栏 = 主管给他定的"超过 2 小时必须来问我""涉及付款必须请示"。
+    <br><br><b>这个类比的边界在哪（很重要）：</b>实习生有<b>责任心和自我意识</b>——他会因为"怕做错"而主动谨慎，会记得上次被批评过。Agent 完全没有这些，它的"谨慎"只是提示词里的一行字，随时可能被某一步的输出冲掉；它也不会真的"记得"上一次，除非你把上次的内容重新放进上下文。<b>凡是涉及后果不可逆的动作，类比失效，必须回到"这是个没有主观意识的循环程序"来理解。</b>
+  </div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="s7">
+  <h2><span class="num">7</span>自测题</h2>
+  <p>建议先写在纸上再展开答案——直接看答案等于没测。</p>
+
+  <p class="qtitle">第 1 题 · 判断<span class="tag trap">看起来对其实错</span></p>
+  <p>"既然工具调用的结果会返回给模型，说明模型具备访问外部世界的能力，只是需要工具作为中介。"</p>
+  <details>
+    <summary>查看答案与解析</summary>
+    <div class="ans">
+      <p><b>判断：错误。</b></p>
+      <p>前半句对，结论错。结果确实会返回给模型，但返回的<b>形式是纯文本</b>，而且中间隔着一层我们自己的程序。模型从头到尾只做了一件事：根据上下文生成下一段文本（其中一段恰好长成"工具调用请求"的样子）。真正访问外部世界的是我们的 Python 代码。</p>
+      <p><b>为什么这话诱人：</b>它把"信息最终到达了模型"偷换成了"模型具有访问能力"。按这个说法，我给你发一条短信告诉你今天下雨，就等于你具备了气象观测能力——显然不成立。<sup><a href="#src-2">[2]</a></sup><sup><a href="#src-3">[3]</a></sup></p>
+    </div>
+  </details>
+
+  <p class="qtitle">第 2 题 · 选择</p>
+  <p>下列哪一项<b>最能</b>作为"这个需求应该用 Agent、而不是固定脚本"的判断依据？</p>
+  <p>A. 任务需要调用 3 个以上的工具<br>
+     B. 任务的输出是自然语言<br>
+     C. 任务的执行路径<b>无法事先穷举</b>，需要根据中间结果临时决定下一步<br>
+     D. 任务涉及大模型</p>
+  <details>
+    <summary>查看答案与解析</summary>
+    <div class="ans">
+      <p><b>答案：C。</b></p>
+      <p>A 错：工具多不代表路径不确定，写死顺序照样能跑十几个工具。B 错：输出是不是自然语言跟架构无关。D 错：涉及模型只是必要条件，用了模型不等于要用 Agent。<br>
+      判断的真正分水岭是<b>路径的不确定性</b>——如果你能在写代码时就把完整流程图画出来，那它是工作流；画不出来、必须"看一步走一步"，才轮到 Agent。<sup><a href="#src-1">[1]</a></sup></p>
+    </div>
+  </details>
+
+  <p class="qtitle">第 3 题 · 简答</p>
+  <p>请说出 Agent 的 5 个组成要素，并指出其中"真正执行动作"的是哪一个。要求每个要素一句话，不能只报名字。</p>
+  <details>
+    <summary>查看答案与解析</summary>
+    <div class="ans">
+      <ol>
+        <li><b>大脑（LLM 决策器）</b>：看当前状态，决定下一步是调工具还是收工。</li>
+        <li><b>工具箱</b>：可供调用的函数/API，<u>由我们的程序真正执行</u>。</li>
+        <li><b>记忆与状态</b>：短期保存本轮轨迹，长期保存跨任务信息。</li>
+        <li><b>循环</b>：Thought → Action → Observation 的交替推进。<sup><a href="#src-2">[2]</a></sup></li>
+        <li><b>停止条件与护栏</b>：步数/预算上限与人工确认关卡。</li>
+      </ol>
+      <p><b>真正执行动作的是"工具箱"那一步，也就是我们自己写的代码</b>，不是模型。答成"模型"或"Agent 自己"是最常见的失分点。</p>
+    </div>
+  </details>
+
+  <p class="qtitle">第 4 题 · 代码阅读</p>
+  <p>看第 4 节代码骨架里的 <code>for step in range(MAX_STEPS): ... else: print("请人工介入")</code>。请回答：这个 <code>else</code> 在什么情况下会执行？如果把 <code>MAX_STEPS</code> 设成一个很大的数（比如 100000），会带来什么具体问题？</p>
+  <details>
+    <summary>查看答案与解析</summary>
+    <div class="ans">
+      <p><b>触发时机：</b>Python 的 <code>for-else</code> 中，<code>else</code> 只在循环<b>没有被 <code>break</code> 打断</b>、正常跑完时才执行。在这里意味着"跑满了步数，模型始终没给出最终答案"。</p>
+      <p><b>设成 100000 的问题：</b>护栏等于形同虚设。一旦某一步的观察结果让它觉得"信息还不够"，它就会持续绕圈，具体后果是：① 费用按 token 累计，可能一夜烧掉可观金额；② 上下文不断变长，最终超出模型窗口而崩溃，或者因为太长导致注意力被稀释、越跑越糊涂；③ 如果工具有副作用（反复写入文件、重复下单），错误会被放大 100000 倍；④ 出问题后轨迹极长，根本没法定位是哪一步开始跑偏的。合理的做法是设一个<b>小到让人肉疼但够用</b>的上限（比如 10~30 步），并在超限后把轨迹存下来人工复盘。<sup><a href="#src-4">[4]</a></sup></p>
+    </div>
+  </details>
+
+  <p class="qtitle">第 5 题 · 判断与纠错</p>
+  <p>"我给 Agent 接上了 MCP，所以它现在具备了自主规划能力。"</p>
+  <details>
+    <summary>查看答案与解析</summary>
+    <div class="ans">
+      <p><b>判断：错误。</b>MCP 解决的是<b>连接问题</b>——用统一协议把数据源和工具接进来，相当于给电脑统一了 USB 口。它不提供规划、推理、循环控制，这些仍然由大模型和我们的循环代码负责。</p>
+      <p><b>正确表述：</b>"我给 Agent 接上了 MCP，所以它现在可以用统一方式接入更多工具和数据源；它的规划能力仍来自模型本身。"<sup><a href="#src-5">[5]</a></sup></p>
+    </div>
+  </details>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="s8">
+  <h2><span class="num">8</span>资料来源</h2>
+  <p>下表中所有链接均由我本人（逢春）在写作时<b>逐条实际访问核验</b>，核验方式为命令行 <code>curl -L</code> 取 HTTP 状态码，并记录核验日期。未核验通过的链接一律不列入本表。</p>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:38px;">编号</th>
+        <th style="width:32%;">来源</th>
+        <th style="width:86px;">核验状态</th>
+        <th>该来源支撑了本文哪部分</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="src-1">
+        <td><b>[1]</b></td>
+        <td>
+          Anthropic 工程团队。<i>Building Effective AI Agents</i>。<br>
+          <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">https://www.anthropic.com/engineering/building-effective-agents</a>
+        </td>
+        <td><span class="status-ok">已核验 200</span><br><span style="font-size:12.5px;color:#5a636e;">2026-09-05</span></td>
+        <td>第 1 节"它不是什么"中三条（非聊天机器人、非固定工作流、非效果必然更好）；第 2 节目标 3；第 5 节"不该用 Agent"的反例；第 6 节误解③"不要过度增加自主性"；第 7 题选题依据。</td>
+      </tr>
+      <tr id="src-2">
+        <td><b>[2]</b></td>
+        <td>
+          Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., &amp; Cao, Y. (2022)。<i>ReAct: Synergizing Reasoning and Acting in Language Models</i>。arXiv:2210.03629。<br>
+          <a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener">https://arxiv.org/abs/2210.03629</a>
+        </td>
+        <td><span class="status-ok">已核验 200</span><br><span style="font-size:12.5px;color:#5a636e;">2026-09-05</span></td>
+        <td>第 4 节要素 4"思考—动作—观察"循环（Thought / Action / Observation 三步交替）；第 6 节误解②关于"动作由外部执行、结果回传"；第 7 题第 1、3 题的解析依据。</td>
+      </tr>
+      <tr id="src-3">
+        <td><b>[3]</b></td>
+        <td>
+          Schick, T., Dwivedi-Yu, J., Dessì, R., Raileanu, R., Lomeli, M., Zettlemoyer, L., &amp; Cancedda, N. (2023)。<i>Toolformer: Language Models Can Teach Themselves to Use Tools</i>。arXiv:2302.04761。<br>
+          <a href="https://arxiv.org/abs/2302.04761" target="_blank" rel="noopener">https://arxiv.org/abs/2302.04761</a>
+        </td>
+        <td><span class="status-ok">已核验 200</span><br><span style="font-size:12.5px;color:#5a636e;">2026-09-05</span></td>
+        <td>第 3 节核心问题 1；第 6 节误解②"模型产出的是结构化文本而非真实访问"；第 7 题第 1 题解析。</td>
+      </tr>
+      <tr id="src-4">
+        <td><b>[4]</b></td>
+        <td>
+          OpenAI。<i>A Practical Guide to Building Agents</i>（PDF，约 7.3 MB）。<br>
+          <a href="https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf" target="_blank" rel="noopener">https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf</a>
+        </td>
+        <td><span class="status-ok">已核验 200</span><br><span style="font-size:12.5px;color:#5a636e;">2026-09-05<br>（PDF 约 7.3 MB）</span></td>
+        <td>第 4 节要素 5"停止条件与护栏"（步数上限、高危动作人工确认）；第 6 节误解③、④；第 7 题第 4 题关于步数上限设置过大会带来的具体后果。</td>
+      </tr>
+      <tr id="src-5">
+        <td><b>[5]</b></td>
+        <td>
+          Model Context Protocol 官方站点。<i>What is the Model Context Protocol (MCP)?</i><br>
+          <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener">https://modelcontextprotocol.io/</a>
+        </td>
+        <td><span class="status-ok">已核验 200</span><br><span style="font-size:12.5px;color:#5a636e;">2026-09-05</span></td>
+        <td>第 4 节要素 3 中关于"外部数据与工具接入的协议层"；第 6 节误解⑤"MCP 是协议不是框架"；第 7 题第 5 题。</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:14px;color:#5a636e;"><b>说明：</b>标题与作者信息同样经过核对——[1] 与 [5] 取自页面 <code>&lt;title&gt;</code> 元数据，[2][3] 取自 arXiv 摘要页的 <code>citation_title</code> / <code>citation_author</code> 元数据，[4] 通过响应头确认确为 PDF（Content-Type: application/pdf，约 7 335 065 字节）。正文中所有解释性文字与代码均为我阅读后的自行表述，非原文摘译。</p>
+</section>
+
+<!-- ============ 9 ============ -->
+<section id="s9">
+  <h2><span class="num">9</span>我的疑问</h2>
+  <ol>
+    <li><b>Agent 的"规划"和模型的"推理"边界到底在哪？</b>我现在的理解是：规划发生在一次模型输出的"想法"里，而步与步之间的推进是靠外部循环代码。那如果一个 Agent 完全没有外部循环，只是模型在单次输出里写一大段"计划 + 逐步执行"，它还算 Agent 吗？还是说这只是"长得像规划的文本"？这个我没想通。</li>
+    <li><b>步数上限该按什么定？</b>我理解要设小一点，但"<b>小到肉疼但够用</b>"是我自己的感觉，有没有更靠谱的估计方法？比如能不能按任务类型给个经验区间？</li>
+    <li><b>多个 Agent 协作时，错误会怎么传播？</b>单个 Agent 跑偏我还能看轨迹找原因，如果是 A 的输出喂给 B、B 再喂给 C，是不是每一步的偏差会叠加放大？业界一般怎么观测和控制这种情况？</li>
+    <li><b>长期记忆到底该存什么？</b>直觉上"什么都存"肯定不行（会污染上下文、检索出不相干的东西），但"存多少算合适"我没有判断标准，也不知道业界有没有比较公认的做法。</li>
+  </ol>
+</section>
+
+<footer>
+  逢春 ·《大数据与人工智能》概念学习资料 · 主题：Agent（智能体）<br>
+  全部 5 条来源均于 2026-09-05 实际访问核验
+</footer>
+
+</div>
+</body>
+</html>
